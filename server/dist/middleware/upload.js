@@ -8,10 +8,18 @@ const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const cloudinary_js_1 = require("../config/cloudinary.js");
-// Ensure uploads folder exists
-const uploadsDir = path_1.default.resolve(process.cwd(), 'uploads');
-if (!fs_1.default.existsSync(uploadsDir)) {
-    fs_1.default.mkdirSync(uploadsDir, { recursive: true });
+const os_1 = __importDefault(require("os"));
+// Ensure uploads folder exists (use /tmp on Vercel / Lambda read-only environment)
+const uploadsDir = process.env.VERCEL
+    ? path_1.default.resolve(os_1.default.tmpdir(), 'uploads')
+    : path_1.default.resolve(process.cwd(), 'uploads');
+try {
+    if (!fs_1.default.existsSync(uploadsDir)) {
+        fs_1.default.mkdirSync(uploadsDir, { recursive: true });
+    }
+}
+catch (e) {
+    console.warn('[Upload] Warning: Could not create uploads directory:', e);
 }
 // Multer storage
 const storage = multer_1.default.diskStorage({

@@ -3,10 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 
-// Ensure uploads folder exists
-const uploadsDir = path.resolve(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+import os from 'os';
+
+// Ensure uploads folder exists (use /tmp on Vercel / Lambda read-only environment)
+const uploadsDir = process.env.VERCEL
+  ? path.resolve(os.tmpdir(), 'uploads')
+  : path.resolve(process.cwd(), 'uploads');
+
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[Upload] Warning: Could not create uploads directory:', e);
 }
 
 // Multer storage

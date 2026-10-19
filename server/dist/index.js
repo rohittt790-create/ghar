@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const db_js_1 = require("./config/db.js");
 const errorHandler_js_1 = require("./middleware/errorHandler.js");
@@ -29,8 +30,17 @@ app.use(express_1.default.urlencoded({ extended: true }));
 if (!process.env.VERCEL) {
     app.use((0, morgan_1.default)('dev'));
 }
-// Static uploads folder
-const uploadsPath = path_1.default.resolve(process.cwd(), 'uploads');
+const os_1 = __importDefault(require("os"));
+// Static uploads folder (uses /tmp on Vercel serverless)
+const uploadsPath = process.env.VERCEL
+    ? path_1.default.resolve(os_1.default.tmpdir(), 'uploads')
+    : path_1.default.resolve(process.cwd(), 'uploads');
+try {
+    if (!fs_1.default.existsSync(uploadsPath)) {
+        fs_1.default.mkdirSync(uploadsPath, { recursive: true });
+    }
+}
+catch (e) { }
 app.use('/uploads', express_1.default.static(uploadsPath));
 // Ensure DB is connected for incoming requests
 app.use(async (req, _res, next) => {

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -30,8 +31,17 @@ if (!process.env.VERCEL) {
   app.use(morgan('dev'));
 }
 
-// Static uploads folder
-const uploadsPath = path.resolve(process.cwd(), 'uploads');
+import os from 'os';
+
+// Static uploads folder (uses /tmp on Vercel serverless)
+const uploadsPath = process.env.VERCEL
+  ? path.resolve(os.tmpdir(), 'uploads')
+  : path.resolve(process.cwd(), 'uploads');
+try {
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+  }
+} catch (e) {}
 app.use('/uploads', express.static(uploadsPath));
 
 // Ensure DB is connected for incoming requests

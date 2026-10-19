@@ -187,6 +187,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <img
                       src={coverImage}
                       alt={prop.name}
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80';
+                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
@@ -239,13 +243,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           <img
                             src={ownerPic}
                             alt={ownerName}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
                             className="w-20 h-20 rounded-2xl object-cover border-2 border-brand-400 shrink-0 shadow-md ring-4 ring-brand-50"
                           />
-                        ) : (
-                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white font-black text-2xl flex items-center justify-center shrink-0 shadow-md ring-4 ring-brand-50">
-                            {ownerName.substring(0, 2).toUpperCase()}
-                          </div>
-                        )}
+                        ) : null}
+                        <div
+                          className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white font-black text-2xl flex items-center justify-center shrink-0 shadow-md ring-4 ring-brand-50"
+                          style={{ display: ownerPic ? 'none' : 'flex' }}
+                        >
+                          {ownerName.substring(0, 2).toUpperCase()}
+                        </div>
 
                         {/* Owner Information */}
                         <div className="flex-1 min-w-0 space-y-2">

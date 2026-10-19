@@ -58,13 +58,32 @@ export const processUploadedFile = async (file: Express.Multer.File): Promise<st
       const result = await cloudinary.uploader.upload(file.path, {
         folder: 'hometrack',
       });
-      // Optionally clean up local file
-      fs.unlink(file.path, () => {});
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {}
       return result.secure_url;
     } catch (err) {
-      console.error('[Upload] Cloudinary upload failed, falling back to local file:', err);
-      return `/uploads/${file.filename}`;
+      console.error('[Upload] Cloudinary upload failed:', err);
     }
   }
+
+  // Convert uploaded image directly into Base64 Data URI
+  // This stores the image bytes right inside the MongoDB document.
+  // It guarantees that images will NEVER break or be lost on serverless
+  // platforms like Vercel and Netlify where local disk is read-only / ephemeral.
+  try {
+    if (file.path && fs.existsSync(file.path)) {
+      const fileBuffer = fs.readFileSync(file.path);
+      const mime = file.mimetype || 'image/jpeg';
+      const base64Data = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {}
+      return base64Data;
+    }
+  } catch (err) {
+    console.error('[Upload] Error reading uploaded file to base64:', err);
+  }
+
   return `/uploads/${file.filename}`;
 };

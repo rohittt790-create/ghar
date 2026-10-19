@@ -40,6 +40,10 @@ export const OwnerDetailModal: React.FC<OwnerDetailModalProps> = ({
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
             }
             alt={owner.name}
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+            }}
             className="w-20 h-20 rounded-full object-cover border-2 border-brand-500 shadow-sm shrink-0"
           />
 

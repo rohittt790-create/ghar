@@ -100,6 +100,10 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({
               'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'
             }
             alt={property.name}
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
+            }}
             className="w-full h-full object-cover opacity-90 transition-all duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />

@@ -175,6 +175,10 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
                           'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
                         }
                         alt={owner.name}
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+                        }}
                         className="w-13 h-13 rounded-full object-cover border-2 border-brand-500 shrink-0"
                       />
                       <div className="min-w-0">

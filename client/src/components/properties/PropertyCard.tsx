@@ -40,6 +40,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'
             }
             alt={property.name}
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />

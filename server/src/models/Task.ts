@@ -148,7 +148,6 @@ TaskSchema.index({ property: 1 });
 TaskSchema.index({ status: 1 });
 TaskSchema.index({ dueDate: 1 });
 TaskSchema.index({ category: 1 });
-TaskSchema.index({ createdBy: 1 });
 TaskSchema.index({ taskName: 'text', description: 'text', assignedWorker: 'text' });
 
 export const Task = mongoose.model<ITask>('Task', TaskSchema);

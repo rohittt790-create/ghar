@@ -67,6 +67,5 @@ const PropertySchema = new Schema<IProperty>(
 PropertySchema.index({ propertyId: 1, createdBy: 1 }, { unique: true });
 PropertySchema.index({ name: 'text', address: 'text', city: 'text' });
 PropertySchema.index({ owner: 1 });
-PropertySchema.index({ createdBy: 1 });
 
 export const Property = mongoose.model<IProperty>('Property', PropertySchema);

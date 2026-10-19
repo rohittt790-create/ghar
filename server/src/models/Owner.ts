@@ -42,6 +42,5 @@ const OwnerSchema = new Schema<IOwner>(
 );
 
 OwnerSchema.index({ name: 'text', email: 'text', phone: 'text', address: 'text' });
-OwnerSchema.index({ createdBy: 1 });
 
 export const Owner = mongoose.model<IOwner>('Owner', OwnerSchema);

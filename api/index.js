@@ -76359,10 +76359,10 @@ var require_connection2 = __commonJS({
         });
       });
     };
-    async function _wrapUserTransaction(fn, session, mongoose7) {
+    async function _wrapUserTransaction(fn, session, mongoose8) {
       try {
-        const res = mongoose7.transactionAsyncLocalStorage == null ? await fn(session) : await new Promise((resolve) => {
-          mongoose7.transactionAsyncLocalStorage.run(
+        const res = mongoose8.transactionAsyncLocalStorage == null ? await fn(session) : await new Promise((resolve) => {
+          mongoose8.transactionAsyncLocalStorage.run(
             { session },
             () => resolve(fn(session))
           );
@@ -89621,7 +89621,7 @@ var require_mongoose = __commonJS({
     Mongoose.prototype.ConnectionStates = STATES;
     Mongoose.prototype.driver = driver;
     Mongoose.prototype.setDriver = function setDriver(driver2) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       if (_mongoose.__driver === driver2) {
         return _mongoose;
       }
@@ -89639,7 +89639,7 @@ var require_mongoose = __commonJS({
         }
       }
       if (driver2.SchemaTypes != null) {
-        Object.assign(mongoose7.Schema.Types, driver2.SchemaTypes);
+        Object.assign(mongoose8.Schema.Types, driver2.SchemaTypes);
       }
       const Connection = driver2.Connection;
       const oldDefaultConnection = _mongoose.connections[0];
@@ -89657,7 +89657,7 @@ var require_mongoose = __commonJS({
       return _mongoose;
     };
     Mongoose.prototype.set = function getsetOptions(key, value) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       if (arguments.length === 1 && typeof key !== "object") {
         if (VALID_OPTIONS.indexOf(key) === -1) {
           const error2 = new SetOptionError();
@@ -89718,7 +89718,7 @@ var require_mongoose = __commonJS({
     };
     Mongoose.prototype.get = Mongoose.prototype.set;
     Mongoose.prototype.createConnection = function createConnection(uri, options) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       const Connection = _mongoose.__driver.Connection;
       const conn = new Connection(_mongoose);
       _mongoose.connections.push(conn);
@@ -89733,7 +89733,7 @@ var require_mongoose = __commonJS({
       if (typeof options === "function" || arguments.length >= 3 && typeof arguments[2] === "function") {
         throw new MongooseError("Mongoose.prototype.connect() no longer accepts a callback");
       }
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       if (_mongoose.connection == null) {
         _createDefaultConnection(_mongoose);
       }
@@ -89744,7 +89744,7 @@ var require_mongoose = __commonJS({
       if (arguments.length >= 1 && typeof arguments[0] === "function") {
         throw new MongooseError("Mongoose.prototype.disconnect() no longer accepts a callback");
       }
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       const remaining = _mongoose.connections.length;
       if (remaining <= 0) {
         return;
@@ -89752,18 +89752,18 @@ var require_mongoose = __commonJS({
       await Promise.all(_mongoose.connections.map((conn) => conn.close()));
     };
     Mongoose.prototype.startSession = function startSession() {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       return _mongoose.connection.startSession.apply(_mongoose.connection, arguments);
     };
     Mongoose.prototype.pluralize = function pluralize(fn) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       if (arguments.length > 0) {
         _mongoose._pluralize = fn;
       }
       return _mongoose._pluralize;
     };
     Mongoose.prototype.model = function model(name, schema, collection, options) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       if (typeof schema === "string") {
         collection = schema;
         schema = false;
@@ -89811,7 +89811,7 @@ var require_mongoose = __commonJS({
       return model2;
     };
     Mongoose.prototype._model = function _model(name, schema, collection, options) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       let model;
       if (typeof name === "function") {
         model = name;
@@ -89850,25 +89850,25 @@ var require_mongoose = __commonJS({
       return model;
     };
     Mongoose.prototype.deleteModel = function deleteModel(name) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       _mongoose.connection.deleteModel(name);
       delete _mongoose.models[name];
       return _mongoose;
     };
     Mongoose.prototype.modelNames = function modelNames() {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       const names = Object.keys(_mongoose.models);
       return names;
     };
     Mongoose.prototype._applyPlugins = function _applyPlugins(schema, options) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       options = options || {};
       options.applyPluginsToDiscriminators = _mongoose.options && _mongoose.options.applyPluginsToDiscriminators || false;
       options.applyPluginsToChildSchemas = typeof (_mongoose.options && _mongoose.options.applyPluginsToChildSchemas) === "boolean" ? _mongoose.options.applyPluginsToChildSchemas : true;
       applyPlugins(schema, _mongoose.plugins, options, "$globalPluginsApplied");
     };
     Mongoose.prototype.plugin = function plugin(fn, opts) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       _mongoose.plugins.push([fn, opts]);
       return _mongoose;
     };
@@ -89918,14 +89918,14 @@ var require_mongoose = __commonJS({
     Mongoose.prototype.DocumentProvider = require_documentProvider();
     Mongoose.prototype.ObjectId = SchemaTypes.ObjectId;
     Mongoose.prototype.isValidObjectId = function isValidObjectId(v) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       return _mongoose.Types.ObjectId.isValid(v);
     };
     Mongoose.prototype.isObjectIdOrHexString = function isObjectIdOrHexString(v) {
       return isBsonType(v, "ObjectId") || typeof v === "string" && objectIdHexRegexp.test(v);
     };
     Mongoose.prototype.syncIndexes = function syncIndexes(options) {
-      const _mongoose = this instanceof Mongoose ? this : mongoose7;
+      const _mongoose = this instanceof Mongoose ? this : mongoose8;
       return _mongoose.connection.syncIndexes(options);
     };
     Mongoose.prototype.Decimal128 = SchemaTypes.Decimal128;
@@ -89945,15 +89945,15 @@ var require_mongoose = __commonJS({
     Mongoose.prototype.skipMiddlewareFunction = Kareem.skipWrappedFunction;
     Mongoose.prototype.overwriteMiddlewareResult = Kareem.overwriteResult;
     Mongoose.prototype.omitUndefined = require_omitUndefined();
-    function _createDefaultConnection(mongoose8) {
-      if (mongoose8.connection) {
+    function _createDefaultConnection(mongoose9) {
+      if (mongoose9.connection) {
         return;
       }
-      const conn = mongoose8.createConnection();
+      const conn = mongoose9.createConnection();
       conn[defaultConnectionSymbol] = true;
-      conn.models = mongoose8.models;
+      conn.models = mongoose9.models;
     }
-    var mongoose7 = module2.exports = exports2 = new Mongoose({
+    var mongoose8 = module2.exports = exports2 = new Mongoose({
       [defaultMongooseSymbol]: true
     });
   }
@@ -89965,10 +89965,10 @@ var require_lib9 = __commonJS({
     "use strict";
     var mongodbDriver = require_node_mongodb_native();
     require_driver().set(mongodbDriver);
-    var mongoose7 = require_mongoose();
-    mongoose7.setDriver(mongodbDriver);
-    mongoose7.Mongoose.prototype.mongo = require_lib6();
-    module2.exports = mongoose7;
+    var mongoose8 = require_mongoose();
+    mongoose8.setDriver(mongodbDriver);
+    mongoose8.Mongoose.prototype.mongo = require_lib6();
+    module2.exports = mongoose8;
   }
 });
 
@@ -89976,55 +89976,55 @@ var require_lib9 = __commonJS({
 var require_mongoose2 = __commonJS({
   "server/node_modules/mongoose/index.js"(exports2, module2) {
     "use strict";
-    var mongoose7 = require_lib9();
-    module2.exports = mongoose7;
-    module2.exports.default = mongoose7;
-    module2.exports.mongoose = mongoose7;
-    module2.exports.cast = mongoose7.cast;
-    module2.exports.STATES = mongoose7.STATES;
-    module2.exports.setDriver = mongoose7.setDriver;
-    module2.exports.set = mongoose7.set;
-    module2.exports.get = mongoose7.get;
-    module2.exports.createConnection = mongoose7.createConnection;
-    module2.exports.connect = mongoose7.connect;
-    module2.exports.disconnect = mongoose7.disconnect;
-    module2.exports.startSession = mongoose7.startSession;
-    module2.exports.pluralize = mongoose7.pluralize;
-    module2.exports.model = mongoose7.model;
-    module2.exports.deleteModel = mongoose7.deleteModel;
-    module2.exports.modelNames = mongoose7.modelNames;
-    module2.exports.plugin = mongoose7.plugin;
-    module2.exports.connections = mongoose7.connections;
-    module2.exports.version = mongoose7.version;
-    module2.exports.Aggregate = mongoose7.Aggregate;
-    module2.exports.Mongoose = mongoose7.Mongoose;
-    module2.exports.Schema = mongoose7.Schema;
-    module2.exports.SchemaType = mongoose7.SchemaType;
-    module2.exports.SchemaTypes = mongoose7.SchemaTypes;
-    module2.exports.VirtualType = mongoose7.VirtualType;
-    module2.exports.Types = mongoose7.Types;
-    module2.exports.Query = mongoose7.Query;
-    module2.exports.Model = mongoose7.Model;
-    module2.exports.Document = mongoose7.Document;
-    module2.exports.ObjectId = mongoose7.ObjectId;
-    module2.exports.isValidObjectId = mongoose7.isValidObjectId;
-    module2.exports.isObjectIdOrHexString = mongoose7.isObjectIdOrHexString;
-    module2.exports.syncIndexes = mongoose7.syncIndexes;
-    module2.exports.Decimal128 = mongoose7.Decimal128;
-    module2.exports.Mixed = mongoose7.Mixed;
-    module2.exports.Date = mongoose7.Date;
-    module2.exports.Number = mongoose7.Number;
-    module2.exports.Error = mongoose7.Error;
-    module2.exports.MongooseError = mongoose7.MongooseError;
-    module2.exports.now = mongoose7.now;
-    module2.exports.CastError = mongoose7.CastError;
-    module2.exports.SchemaTypeOptions = mongoose7.SchemaTypeOptions;
-    module2.exports.mongo = mongoose7.mongo;
-    module2.exports.mquery = mongoose7.mquery;
-    module2.exports.sanitizeFilter = mongoose7.sanitizeFilter;
-    module2.exports.trusted = mongoose7.trusted;
-    module2.exports.skipMiddlewareFunction = mongoose7.skipMiddlewareFunction;
-    module2.exports.overwriteMiddlewareResult = mongoose7.overwriteMiddlewareResult;
+    var mongoose8 = require_lib9();
+    module2.exports = mongoose8;
+    module2.exports.default = mongoose8;
+    module2.exports.mongoose = mongoose8;
+    module2.exports.cast = mongoose8.cast;
+    module2.exports.STATES = mongoose8.STATES;
+    module2.exports.setDriver = mongoose8.setDriver;
+    module2.exports.set = mongoose8.set;
+    module2.exports.get = mongoose8.get;
+    module2.exports.createConnection = mongoose8.createConnection;
+    module2.exports.connect = mongoose8.connect;
+    module2.exports.disconnect = mongoose8.disconnect;
+    module2.exports.startSession = mongoose8.startSession;
+    module2.exports.pluralize = mongoose8.pluralize;
+    module2.exports.model = mongoose8.model;
+    module2.exports.deleteModel = mongoose8.deleteModel;
+    module2.exports.modelNames = mongoose8.modelNames;
+    module2.exports.plugin = mongoose8.plugin;
+    module2.exports.connections = mongoose8.connections;
+    module2.exports.version = mongoose8.version;
+    module2.exports.Aggregate = mongoose8.Aggregate;
+    module2.exports.Mongoose = mongoose8.Mongoose;
+    module2.exports.Schema = mongoose8.Schema;
+    module2.exports.SchemaType = mongoose8.SchemaType;
+    module2.exports.SchemaTypes = mongoose8.SchemaTypes;
+    module2.exports.VirtualType = mongoose8.VirtualType;
+    module2.exports.Types = mongoose8.Types;
+    module2.exports.Query = mongoose8.Query;
+    module2.exports.Model = mongoose8.Model;
+    module2.exports.Document = mongoose8.Document;
+    module2.exports.ObjectId = mongoose8.ObjectId;
+    module2.exports.isValidObjectId = mongoose8.isValidObjectId;
+    module2.exports.isObjectIdOrHexString = mongoose8.isObjectIdOrHexString;
+    module2.exports.syncIndexes = mongoose8.syncIndexes;
+    module2.exports.Decimal128 = mongoose8.Decimal128;
+    module2.exports.Mixed = mongoose8.Mixed;
+    module2.exports.Date = mongoose8.Date;
+    module2.exports.Number = mongoose8.Number;
+    module2.exports.Error = mongoose8.Error;
+    module2.exports.MongooseError = mongoose8.MongooseError;
+    module2.exports.now = mongoose8.now;
+    module2.exports.CastError = mongoose8.CastError;
+    module2.exports.SchemaTypeOptions = mongoose8.SchemaTypeOptions;
+    module2.exports.mongo = mongoose8.mongo;
+    module2.exports.mquery = mongoose8.mquery;
+    module2.exports.sanitizeFilter = mongoose8.sanitizeFilter;
+    module2.exports.trusted = mongoose8.trusted;
+    module2.exports.skipMiddlewareFunction = mongoose8.skipMiddlewareFunction;
+    module2.exports.overwriteMiddlewareResult = mongoose8.overwriteMiddlewareResult;
   }
 });
 
@@ -118386,6 +118386,7 @@ router7.get("/summary", getDashboardSummary);
 var dashboardRoutes_default = router7;
 
 // server/src/index.ts
+var import_mongoose7 = __toESM(require_mongoose2());
 import_dotenv.default.config();
 var app = (0, import_express8.default)();
 var PORT = process.env.PORT || 5001;
@@ -118396,6 +118397,14 @@ app.use(import_express8.default.urlencoded({ extended: true }));
 app.use((0, import_morgan.default)("dev"));
 var uploadsPath = import_path2.default.resolve(process.cwd(), "uploads");
 app.use("/uploads", import_express8.default.static(uploadsPath));
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error("[DB Middleware Error]", err);
+  }
+  next();
+});
 app.use("/api/auth", authRoutes_default);
 app.use("/api/owners", ownerRoutes_default);
 app.use("/api/properties", propertyRoutes_default);
@@ -118403,10 +118412,18 @@ app.use("/api/tasks", taskRoutes_default);
 app.use("/api/reminders", reminderRoutes_default);
 app.use("/api/reports", reportRoutes_default);
 app.use("/api/dashboard", dashboardRoutes_default);
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", async (_req, res) => {
+  try {
+    await connectDB();
+  } catch (e) {
+  }
+  const dbState = import_mongoose7.default.connection.readyState;
+  const states = ["disconnected", "connected", "connecting", "disconnecting"];
   res.json({
-    status: "ok",
-    message: "KAILASH BHAWAN API is running smoothly",
+    status: dbState === 1 ? "ok" : "degraded",
+    database: states[dbState] || "unknown",
+    hasMongoUri: !!process.env.MONGODB_URI,
+    message: dbState === 1 ? "KAILASH BHAWAN API is running smoothly" : "Database is not connected. Please verify MONGODB_URI in Vercel Settings and ensure Atlas IP Access List has 0.0.0.0/0 enabled.",
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   });
 });

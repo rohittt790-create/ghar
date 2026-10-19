@@ -32,6 +32,18 @@ app.use(morgan('dev'));
 const uploadsPath = path.resolve(process.cwd(), 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
+import mongoose from 'mongoose';
+
+// Ensure DB is connected for all incoming requests (especially serverless cold starts)
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('[DB Middleware Error]', err);
+  }
+  next();
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/owners', ownerRoutes);
@@ -42,10 +54,20 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Health check endpoint
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
+  try {
+    await connectDB();
+  } catch (e) {}
+  const dbState = mongoose.connection.readyState;
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
   res.json({
-    status: 'ok',
-    message: 'KAILASH BHAWAN API is running smoothly',
+    status: dbState === 1 ? 'ok' : 'degraded',
+    database: states[dbState] || 'unknown',
+    hasMongoUri: !!process.env.MONGODB_URI,
+    message:
+      dbState === 1
+        ? 'KAILASH BHAWAN API is running smoothly'
+        : 'Database is not connected. Please verify MONGODB_URI in Vercel Settings and ensure Atlas IP Access List has 0.0.0.0/0 enabled.',
     timestamp: new Date().toISOString(),
   });
 });

@@ -53,7 +53,11 @@ app.get('/api/health', (_req, res) => {
 // Global error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[KAILASH BHAWAN Server] Server started on port ${PORT}`);
-  console.log(`[KAILASH BHAWAN Server] Health check: http://localhost:${PORT}/api/health`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[KAILASH BHAWAN Server] Server started on port ${PORT}`);
+    console.log(`[KAILASH BHAWAN Server] Health check: http://localhost:${PORT}/api/health`);
+  });
+}
+
+export default app;

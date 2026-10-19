@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import { User } from '../models/User.js';
 import { AuthRequest } from '../middleware/auth.js';
 
@@ -10,6 +11,15 @@ const generateToken = (userId: string): string => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      res.status(503).json({
+        success: false,
+        message:
+          'Database is unreachable. Please ensure 0.0.0.0/0 (Allow Access from Anywhere) is added in MongoDB Atlas -> Network Access.',
+      });
+      return;
+    }
+
     const { name, email, password, role, phone } = req.body;
 
     if (!name || !email || !password) {
@@ -53,6 +63,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      res.status(503).json({
+        success: false,
+        message:
+          'Database is unreachable. Please ensure 0.0.0.0/0 (Allow Access from Anywhere) is added in MongoDB Atlas -> Network Access.',
+      });
+      return;
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {

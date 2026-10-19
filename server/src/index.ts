@@ -19,27 +19,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Connect to MongoDB
-connectDB();
+import mongoose from 'mongoose';
+import { lastDbError } from './config/db.js';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+if (!process.env.VERCEL) {
+  app.use(morgan('dev'));
+}
 
 // Static uploads folder
 const uploadsPath = path.resolve(process.cwd(), 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
-import mongoose from 'mongoose';
-
-// Ensure DB is connected for all incoming requests (especially serverless cold starts)
-app.use(async (_req, _res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.error('[DB Middleware Error]', err);
+// Ensure DB is connected for incoming requests
+app.use(async (req, _res, next) => {
+  if (req.path === '/api/health' || req.path === '/health') {
+    return next();
+  }
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+    } catch (err) {
+      console.error('[DB Middleware Error]', err);
+    }
   }
   next();
 });
@@ -53,21 +58,19 @@ app.use(['/api/reminders', '/reminders'], reminderRoutes);
 app.use(['/api/reports', '/reports'], reportRoutes);
 app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
 
-// Health check endpoint
-app.get(['/api/health', '/health'], async (_req, res) => {
-  try {
-    await connectDB();
-  } catch (e) {}
+// Health check endpoint (fast, returns immediately)
+app.get(['/api/health', '/health'], (_req, res) => {
   const dbState = mongoose.connection.readyState;
   const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
   res.json({
     status: dbState === 1 ? 'ok' : 'degraded',
     database: states[dbState] || 'unknown',
     hasMongoUri: !!process.env.MONGODB_URI,
+    lastDbError: lastDbError || null,
     message:
       dbState === 1
         ? 'KAILASH BHAWAN API is running smoothly'
-        : 'Database is not connected. Please verify MONGODB_URI in Vercel Settings and ensure Atlas IP Access List has 0.0.0.0/0 enabled.',
+        : 'Database is not connected. In MongoDB Atlas -> Network Access, add 0.0.0.0/0 (Allow Access from Anywhere).',
     timestamp: new Date().toISOString(),
   });
 });

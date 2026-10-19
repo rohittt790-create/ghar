@@ -1,58 +1,80 @@
 import mongoose from 'mongoose';
-import dns from 'dns';
 
-let isConnected = false;
+export const DIRECT_ATLAS_URI =
+  'mongodb://rohittt790_db_user:iCzWZI0dDUSjjDTR@ac-2uovvaj-shard-00-00.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-01.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-02.r2wn6ka.mongodb.net:27017/hometrack?ssl=true&replicaSet=atlas-2uovvaj-shard-0&authSource=admin&retryWrites=true&w=majority';
+
+export const SRV_ATLAS_URI =
+  'mongodb+srv://rohittt790_db_user:iCzWZI0dDUSjjDTR@cluster0.r2wn6ka.mongodb.net/hometrack?retryWrites=true&w=majority';
+
+let connectionPromise: Promise<void> | null = null;
+export let lastDbError: string | null = null;
 
 export const connectDB = async (): Promise<void> => {
-  if (isConnected || mongoose.connection.readyState >= 1) {
+  // If already connected, return immediately
+  if (mongoose.connection.readyState === 1) {
+    lastDbError = null;
     return;
   }
 
-  const uri =
-    process.env.MONGODB_URI ||
-    'mongodb+srv://rohittt790_db_user:iCzWZI0dDUSjjDTR@cluster0.r2wn6ka.mongodb.net/hometrack?retryWrites=true&w=majority';
+  // If already connecting, reuse existing promise
+  if (connectionPromise) {
+    return connectionPromise;
+  }
 
-  // If using mongodb+srv, ensure public DNS resolvers (8.8.8.8 / 1.1.1.1) are configured to resolve SRV records
-  if (uri.startsWith('mongodb+srv://')) {
+  connectionPromise = (async () => {
+    const isVercel = Boolean(process.env.VERCEL);
+    const timeoutMs = isVercel ? 2500 : 5000;
+    const uri = process.env.MONGODB_URI || DIRECT_ATLAS_URI;
+
     try {
-      dns.setServers(['8.8.8.8', '1.1.1.1']);
-      console.log('[Database] Configured Google/Cloudflare DNS for MongoDB Atlas SRV resolution.');
-    } catch (e) {
-      console.warn('[Database] Could not set custom DNS servers:', e);
-    }
-  }
+      console.log(`[Database] Connecting to MongoDB (timeout ${timeoutMs}ms)...`);
+      const conn = await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: timeoutMs,
+        connectTimeoutMS: timeoutMs,
+        socketTimeoutMS: timeoutMs,
+      });
+      lastDbError = null;
+      console.log(`[Database] Connected successfully to: ${conn.connection.host}/${conn.connection.name}`);
+    } catch (err: any) {
+      lastDbError = err?.message || String(err);
+      console.error('[Database] Primary connection failed:', lastDbError);
 
-  try {
-    console.log('[Database] Attempting connection to MongoDB...');
-    const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000,
-    });
-    isConnected = true;
-    console.log(`[Database] MongoDB Connected successfully to: ${conn.connection.host}/${conn.connection.name}`);
-  } catch (error: any) {
-    console.error('[Database] MongoDB Connection Error:', error?.message || error);
-
-    // If Atlas connection failed due to IP whitelist or network issue and not on Vercel
-    if (uri.startsWith('mongodb+srv://') && !process.env.VERCEL) {
-      console.warn('\n[Database] ⚠️ MongoDB Atlas Connection Notice:');
-      console.warn('If this is an IP Whitelist error, please ensure your IP (or 0.0.0.0/0) is added to MongoDB Atlas -> Network Access.');
-      console.warn('Falling back to local MongoDB instance (mongodb://127.0.0.1:27017/hometrack) to keep the app functional...\n');
-
-      try {
-        const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/hometrack', {
-          serverSelectionTimeoutMS: 5000,
-        });
-        isConnected = true;
-        console.log(`[Database] Fallback Connected to local MongoDB: ${localConn.connection.host}/${localConn.connection.name}`);
-        return;
-      } catch (localErr) {
-        console.error('[Database] Local fallback also failed:', localErr);
+      // If SRV failed or timed out, try direct shard URI immediately
+      if (uri.startsWith('mongodb+srv://')) {
+        try {
+          console.log('[Database] Retrying with direct shard connection...');
+          const connDirect = await mongoose.connect(DIRECT_ATLAS_URI, {
+            serverSelectionTimeoutMS: timeoutMs,
+            connectTimeoutMS: timeoutMs,
+            socketTimeoutMS: timeoutMs,
+          });
+          lastDbError = null;
+          console.log(`[Database] Direct shard connected to: ${connDirect.connection.host}`);
+          return;
+        } catch (err2: any) {
+          lastDbError = err2?.message || String(err2);
+          console.error('[Database] Direct connection also failed:', lastDbError);
+        }
       }
-    }
 
-    if (!process.env.VERCEL) {
-      console.log('[Database] Retrying connection in 10 seconds...');
-      setTimeout(connectDB, 10000);
+      // Local MongoDB fallback when running locally
+      if (!isVercel) {
+        try {
+          console.log('[Database] Trying local MongoDB instance...');
+          const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/hometrack', {
+            serverSelectionTimeoutMS: 2000,
+          });
+          lastDbError = null;
+          console.log(`[Database] Connected to local MongoDB fallback: ${localConn.connection.host}`);
+          return;
+        } catch (localErr: any) {
+          console.warn('[Database] Local fallback unavailable:', localErr?.message);
+        }
+      }
+    } finally {
+      connectionPromise = null;
     }
-  }
+  })();
+
+  return connectionPromise;
 };

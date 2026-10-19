@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTeamMembers = exports.getMe = exports.login = exports.register = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const User_js_1 = require("../models/User.js");
 const generateToken = (userId) => {
     const secret = process.env.JWT_SECRET || 'hometrack_super_secure_jwt_secret_key_2026_dev';
@@ -12,6 +13,13 @@ const generateToken = (userId) => {
 };
 const register = async (req, res) => {
     try {
+        if (mongoose_1.default.connection.readyState !== 1) {
+            res.status(503).json({
+                success: false,
+                message: 'Database is unreachable. Please ensure 0.0.0.0/0 (Allow Access from Anywhere) is added in MongoDB Atlas -> Network Access.',
+            });
+            return;
+        }
         const { name, email, password, role, phone } = req.body;
         if (!name || !email || !password) {
             res.status(400).json({ success: false, message: 'Please provide name, email, and password.' });
@@ -51,6 +59,13 @@ const register = async (req, res) => {
 exports.register = register;
 const login = async (req, res) => {
     try {
+        if (mongoose_1.default.connection.readyState !== 1) {
+            res.status(503).json({
+                success: false,
+                message: 'Database is unreachable. Please ensure 0.0.0.0/0 (Allow Access from Anywhere) is added in MongoDB Atlas -> Network Access.',
+            });
+            return;
+        }
         const { email, password } = req.body;
         if (!email || !password) {
             res.status(400).json({ success: false, message: 'Please provide email and password.' });

@@ -20,24 +20,30 @@ const dashboardRoutes_js_1 = __importDefault(require("./routes/dashboardRoutes.j
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
-// Connect to MongoDB
-(0, db_js_1.connectDB)();
+const mongoose_1 = __importDefault(require("mongoose"));
+const db_js_2 = require("./config/db.js");
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-app.use((0, morgan_1.default)('dev'));
+if (!process.env.VERCEL) {
+    app.use((0, morgan_1.default)('dev'));
+}
 // Static uploads folder
 const uploadsPath = path_1.default.resolve(process.cwd(), 'uploads');
 app.use('/uploads', express_1.default.static(uploadsPath));
-const mongoose_1 = __importDefault(require("mongoose"));
-// Ensure DB is connected for all incoming requests (especially serverless cold starts)
-app.use(async (_req, _res, next) => {
-    try {
-        await (0, db_js_1.connectDB)();
+// Ensure DB is connected for incoming requests
+app.use(async (req, _res, next) => {
+    if (req.path === '/api/health' || req.path === '/health') {
+        return next();
     }
-    catch (err) {
-        console.error('[DB Middleware Error]', err);
+    if (mongoose_1.default.connection.readyState !== 1) {
+        try {
+            await (0, db_js_1.connectDB)();
+        }
+        catch (err) {
+            console.error('[DB Middleware Error]', err);
+        }
     }
     next();
 });
@@ -49,21 +55,18 @@ app.use(['/api/tasks', '/tasks'], taskRoutes_js_1.default);
 app.use(['/api/reminders', '/reminders'], reminderRoutes_js_1.default);
 app.use(['/api/reports', '/reports'], reportRoutes_js_1.default);
 app.use(['/api/dashboard', '/dashboard'], dashboardRoutes_js_1.default);
-// Health check endpoint
-app.get(['/api/health', '/health'], async (_req, res) => {
-    try {
-        await (0, db_js_1.connectDB)();
-    }
-    catch (e) { }
+// Health check endpoint (fast, returns immediately)
+app.get(['/api/health', '/health'], (_req, res) => {
     const dbState = mongoose_1.default.connection.readyState;
     const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
     res.json({
         status: dbState === 1 ? 'ok' : 'degraded',
         database: states[dbState] || 'unknown',
         hasMongoUri: !!process.env.MONGODB_URI,
+        lastDbError: db_js_2.lastDbError || null,
         message: dbState === 1
             ? 'KAILASH BHAWAN API is running smoothly'
-            : 'Database is not connected. Please verify MONGODB_URI in Vercel Settings and ensure Atlas IP Access List has 0.0.0.0/0 enabled.',
+            : 'Database is not connected. In MongoDB Atlas -> Network Access, add 0.0.0.0/0 (Allow Access from Anywhere).',
         timestamp: new Date().toISOString(),
     });
 });

@@ -8,7 +8,9 @@ export const connectDB = async (): Promise<void> => {
     return;
   }
 
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hometrack';
+  const uri =
+    process.env.MONGODB_URI ||
+    'mongodb+srv://rohittt790_db_user:iCzWZI0dDUSjjDTR@cluster0.r2wn6ka.mongodb.net/hometrack?retryWrites=true&w=majority';
 
   // If using mongodb+srv, ensure public DNS resolvers (8.8.8.8 / 1.1.1.1) are configured to resolve SRV records
   if (uri.startsWith('mongodb+srv://')) {

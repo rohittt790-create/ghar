@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const propertyController_js_1 = require("../controllers/propertyController.js");
+const auth_js_1 = require("../middleware/auth.js");
+const upload_js_1 = require("../middleware/upload.js");
+const router = (0, express_1.Router)();
+router.use(auth_js_1.authenticate);
+router.get('/', propertyController_js_1.getProperties);
+router.get('/:id', propertyController_js_1.getPropertyById);
+router.post('/', upload_js_1.upload.array('propertyPhotos', 10), propertyController_js_1.createProperty);
+router.put('/:id', upload_js_1.upload.array('propertyPhotos', 10), propertyController_js_1.updateProperty);
+router.delete('/:id', propertyController_js_1.deleteProperty);
+exports.default = router;

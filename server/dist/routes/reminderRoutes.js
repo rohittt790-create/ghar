@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const reminderController_js_1 = require("../controllers/reminderController.js");
+const auth_js_1 = require("../middleware/auth.js");
+const router = (0, express_1.Router)();
+router.use(auth_js_1.authenticate);
+router.get('/', reminderController_js_1.getReminders);
+router.get('/alerts/active', reminderController_js_1.getActiveAlerts);
+router.post('/', reminderController_js_1.createReminder);
+router.patch('/:id/status', reminderController_js_1.updateReminderStatus);
+router.delete('/:id', reminderController_js_1.deleteReminder);
+exports.default = router;

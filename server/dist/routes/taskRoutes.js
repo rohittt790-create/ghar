@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const taskController_js_1 = require("../controllers/taskController.js");
+const auth_js_1 = require("../middleware/auth.js");
+const upload_js_1 = require("../middleware/upload.js");
+const router = (0, express_1.Router)();
+router.use(auth_js_1.authenticate);
+router.get('/', taskController_js_1.getTasks);
+router.get('/:id', taskController_js_1.getTaskById);
+router.post('/', upload_js_1.upload.array('progressPhotos', 10), taskController_js_1.createTask);
+router.put('/:id', upload_js_1.upload.array('progressPhotos', 10), taskController_js_1.updateTask);
+router.patch('/:id/status', taskController_js_1.updateTaskStatus);
+router.post('/:id/photos', upload_js_1.upload.array('photos', 10), taskController_js_1.uploadTaskPhotos);
+router.delete('/:id', taskController_js_1.deleteTask);
+exports.default = router;

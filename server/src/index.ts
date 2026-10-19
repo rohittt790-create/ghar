@@ -44,17 +44,17 @@ app.use(async (_req, _res, next) => {
   next();
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/owners', ownerRoutes);
-app.use('/api/properties', propertyRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/reminders', reminderRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// API Routes (supports both /api/* and /* for Vercel rewrites)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/owners', '/owners'], ownerRoutes);
+app.use(['/api/properties', '/properties'], propertyRoutes);
+app.use(['/api/tasks', '/tasks'], taskRoutes);
+app.use(['/api/reminders', '/reminders'], reminderRoutes);
+app.use(['/api/reports', '/reports'], reportRoutes);
+app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
 
 // Health check endpoint
-app.get('/api/health', async (_req, res) => {
+app.get(['/api/health', '/health'], async (_req, res) => {
   try {
     await connectDB();
   } catch (e) {}

@@ -5,8 +5,12 @@ import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 
 import os from 'os';
 
-// Ensure uploads folder exists (use /tmp on Vercel / Lambda read-only environment)
-const uploadsDir = process.env.VERCEL
+const isServerless = Boolean(
+  process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
+);
+
+// Ensure uploads folder exists (use /tmp on Vercel / Netlify / Lambda read-only environment)
+const uploadsDir = isServerless
   ? path.resolve(os.tmpdir(), 'uploads')
   : path.resolve(process.cwd(), 'uploads');
 

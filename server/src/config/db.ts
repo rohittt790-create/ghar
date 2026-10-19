@@ -22,8 +22,10 @@ export const connectDB = async (): Promise<void> => {
   }
 
   connectionPromise = (async () => {
-    const isVercel = Boolean(process.env.VERCEL);
-    const timeoutMs = isVercel ? 2500 : 5000;
+    const isServerless = Boolean(
+      process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
+    );
+    const timeoutMs = isServerless ? 2500 : 5000;
     const uri = process.env.MONGODB_URI || DIRECT_ATLAS_URI;
 
     try {
@@ -58,7 +60,7 @@ export const connectDB = async (): Promise<void> => {
       }
 
       // Local MongoDB fallback when running locally
-      if (!isVercel) {
+      if (!isServerless) {
         try {
           console.log('[Database] Trying local MongoDB instance...');
           const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/hometrack', {

@@ -23,16 +23,17 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
 const mongoose_1 = __importDefault(require("mongoose"));
 const db_js_2 = require("./config/db.js");
+const isServerless = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-if (!process.env.VERCEL) {
+if (!isServerless) {
     app.use((0, morgan_1.default)('dev'));
 }
 const os_1 = __importDefault(require("os"));
-// Static uploads folder (uses /tmp on Vercel serverless)
-const uploadsPath = process.env.VERCEL
+// Static uploads folder (uses /tmp on serverless environments)
+const uploadsPath = isServerless
     ? path_1.default.resolve(os_1.default.tmpdir(), 'uploads')
     : path_1.default.resolve(process.cwd(), 'uploads');
 try {
@@ -82,7 +83,7 @@ app.get(['/api/health', '/health'], (_req, res) => {
 });
 // Global error handler
 app.use(errorHandler_js_1.errorHandler);
-if (!process.env.VERCEL) {
+if (!isServerless) {
     app.listen(PORT, () => {
         console.log(`[KAILASH BHAWAN Server] Server started on port ${PORT}`);
         console.log(`[KAILASH BHAWAN Server] Health check: http://localhost:${PORT}/api/health`);

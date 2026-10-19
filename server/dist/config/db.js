@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = exports.lastDbError = exports.SRV_ATLAS_URI = exports.DIRECT_ATLAS_URI = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-exports.DIRECT_ATLAS_URI = 'mongodb://rohittt790_db_user:iCzWZI0dDUSjjDTR@ac-2uovvaj-shard-00-00.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-01.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-02.r2wn6ka.mongodb.net:27017/hometrack?ssl=true&replicaSet=atlas-2uovvaj-shard-0&authSource=admin&retryWrites=true&w=majority';
+exports.DIRECT_ATLAS_URI = 'mongodb://rohittt790_db_user:iCzWZI0dDUSjjDTR@ac-2uovvaj-shard-00-00.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-01.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-02.r2wn6ka.mongodb.net:27017/hometrack?ssl=true&replicaSet=atlas-x1d7cz-shard-0&authSource=admin&retryWrites=true&w=majority';
 exports.SRV_ATLAS_URI = 'mongodb+srv://rohittt790_db_user:iCzWZI0dDUSjjDTR@cluster0.r2wn6ka.mongodb.net/hometrack?retryWrites=true&w=majority';
 let connectionPromise = null;
 exports.lastDbError = null;
@@ -21,7 +21,7 @@ const connectDB = async () => {
     }
     connectionPromise = (async () => {
         const isServerless = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
-        const timeoutMs = isServerless ? 2500 : 5000;
+        const timeoutMs = isServerless ? 4500 : 8000;
         const uri = process.env.MONGODB_URI || exports.DIRECT_ATLAS_URI;
         try {
             console.log(`[Database] Connecting to MongoDB (timeout ${timeoutMs}ms)...`);

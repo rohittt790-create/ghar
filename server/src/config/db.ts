@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export const DIRECT_ATLAS_URI =
-  'mongodb://rohittt790_db_user:iCzWZI0dDUSjjDTR@ac-2uovvaj-shard-00-00.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-01.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-02.r2wn6ka.mongodb.net:27017/hometrack?ssl=true&replicaSet=atlas-2uovvaj-shard-0&authSource=admin&retryWrites=true&w=majority';
+  'mongodb://rohittt790_db_user:iCzWZI0dDUSjjDTR@ac-2uovvaj-shard-00-00.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-01.r2wn6ka.mongodb.net:27017,ac-2uovvaj-shard-00-02.r2wn6ka.mongodb.net:27017/hometrack?ssl=true&replicaSet=atlas-x1d7cz-shard-0&authSource=admin&retryWrites=true&w=majority';
 
 export const SRV_ATLAS_URI =
   'mongodb+srv://rohittt790_db_user:iCzWZI0dDUSjjDTR@cluster0.r2wn6ka.mongodb.net/hometrack?retryWrites=true&w=majority';
@@ -25,7 +25,7 @@ export const connectDB = async (): Promise<void> => {
     const isServerless = Boolean(
       process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME
     );
-    const timeoutMs = isServerless ? 2500 : 5000;
+    const timeoutMs = isServerless ? 4500 : 8000;
     const uri = process.env.MONGODB_URI || DIRECT_ATLAS_URI;
 
     try {

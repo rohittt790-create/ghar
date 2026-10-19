@@ -1,0 +1,140 @@
+import { Response } from 'express';
+import { Owner } from '../models/Owner.js';
+import { Property } from '../models/Property.js';
+import { Task } from '../models/Task.js';
+import { AuthRequest } from '../middleware/auth.js';
+
+export const getDashboardSummary = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+
+    const totalOwners = await Owner.countDocuments({ createdBy: userId });
+    const totalProperties = await Property.countDocuments({ createdBy: userId });
+
+    const tasks = await Task.find({ createdBy: userId }).populate({
+      path: 'property',
+      select: 'name propertyId coverPhoto owner',
+      populate: { path: 'owner', select: 'name phone email' },
+    });
+
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === 'completed').length;
+    const inProgressTasks = tasks.filter((t) => t.status === 'in_progress').length;
+    const notStartedTasks = tasks.filter((t) => t.status === 'not_started').length;
+    const onHoldTasks = tasks.filter((t) => t.status === 'on_hold').length;
+
+    const now = new Date();
+    const overdueTasks = tasks.filter(
+      (t) => t.status !== 'completed' && new Date(t.dueDate) < now
+    );
+
+    const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const upcomingDeadlines = tasks
+      .filter((t) => t.status !== 'completed' && new Date(t.dueDate) >= now && new Date(t.dueDate) <= sevenDaysFromNow)
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+    // Properties list with progress for this user
+    const properties = await Property.find({ createdBy: userId })
+      .populate('owner', 'name phone email profilePicture address city state zipCode emergencyContact')
+      .sort({ updatedAt: -1 });
+
+    const totalBudget = properties.reduce((sum, p) => sum + (p.estimatedBudget || 0), 0);
+    const totalSpent = tasks.reduce((sum, t) => sum + (t.actualCost || 0), 0);
+
+    // Overall construction progress
+    const overallProgress =
+      totalTasks > 0
+        ? Math.round(((completedTasks + inProgressTasks * 0.4) / totalTasks) * 100)
+        : 0;
+
+    // Recent photos extracted from this user's tasks
+    const allPhotos: Array<{
+      url: string;
+      caption?: string;
+      stage: 'before' | 'during' | 'after';
+      uploadedAt: Date;
+      taskName: string;
+      taskId: string;
+      propertyName: string;
+      propertyId: string;
+    }> = [];
+
+    // Recent activities compiled from this user's task histories
+    const recentActivities: Array<{
+      action: string;
+      changedBy: string;
+      timestamp: Date;
+      notes?: string;
+      taskName: string;
+      taskId: string;
+      propertyName: string;
+    }> = [];
+
+    tasks.forEach((t) => {
+      const propName = (t.property as any)?.name || 'Property';
+      const propId = (t.property as any)?.propertyId || '';
+
+      if (t.progressPhotos && t.progressPhotos.length > 0) {
+        t.progressPhotos.forEach((p) => {
+          allPhotos.push({
+            url: p.url,
+            caption: p.caption,
+            stage: p.stage,
+            uploadedAt: p.uploadedAt,
+            taskName: t.taskName,
+            taskId: t._id.toString(),
+            propertyName: propName,
+            propertyId: propId,
+          });
+        });
+      }
+
+      if (t.history && t.history.length > 0) {
+        t.history.forEach((h) => {
+          recentActivities.push({
+            action: h.action,
+            changedBy: h.changedBy,
+            timestamp: h.timestamp,
+            notes: h.notes,
+            taskName: t.taskName,
+            taskId: t._id.toString(),
+            propertyName: propName,
+          });
+        });
+      }
+    });
+
+    // Sort photos and activities by newest first
+    allPhotos.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    recentActivities.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    res.status(200).json({
+      success: true,
+      counts: {
+        totalOwners,
+        totalProperties,
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        notStartedTasks,
+        onHoldTasks,
+        overdueTasksCount: overdueTasks.length,
+      },
+      overallProgress,
+      financials: {
+        totalBudget,
+        totalSpent,
+        variance: totalSpent - totalBudget,
+      },
+      upcomingDeadlines: upcomingDeadlines.slice(0, 6),
+      overdueTasks: overdueTasks.slice(0, 6),
+      recentPhotos: allPhotos.slice(0, 8),
+      recentActivities: recentActivities.slice(0, 10),
+      properties: properties.slice(0, 5),
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || 'Error fetching dashboard summary' });
+  }
+};

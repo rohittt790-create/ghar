@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Layers,
   QrCode,
+  Smartphone,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNotifications } from '../../context/NotificationContext.js';
@@ -34,6 +35,7 @@ interface SidebarProps {
   onCloseMobile?: () => void;
   onOpenLoginModal?: () => void;
   onOpenPaymentModal?: () => void;
+  onOpenMobileAppModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -43,6 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onOpenLoginModal,
   onOpenPaymentModal,
+  onOpenMobileAppModal,
 }) => {
   const { user, logout } = useAuth();
   const { totalAlerts } = useNotifications();
@@ -177,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Instant UPI Payment Action Card */}
         {onOpenPaymentModal && (
-          <div className="px-3 pb-3">
+          <div className="px-3 pb-2">
             <button
               onClick={onOpenPaymentModal}
               className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-amber-600/20 via-amber-500/10 to-amber-600/20 border border-amber-500/30 hover:border-amber-400 text-left transition-all group shadow-xs"
@@ -192,6 +195,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="text-[9px] text-emerald-400 font-bold bg-emerald-500/10 px-1 rounded">Instant</span>
                   </div>
                   <p className="text-xs font-bold text-white truncate">Pay via QR Code</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Download Mobile App Card */}
+        {onOpenMobileAppModal && (
+          <div className="px-3 pb-3">
+            <button
+              onClick={onOpenMobileAppModal}
+              className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-emerald-600/20 via-teal-500/10 to-emerald-600/20 border border-emerald-500/30 hover:border-emerald-400 text-left transition-all group shadow-xs"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/40 group-hover:scale-105 transition-transform">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Mobile App</span>
+                    <span className="text-[9px] text-white font-bold bg-emerald-500/30 px-1 rounded">Android/iOS</span>
+                  </div>
+                  <p className="text-xs font-bold text-white truncate">Download Phone App</p>
                 </div>
               </div>
             </button>

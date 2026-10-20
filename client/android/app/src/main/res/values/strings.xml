@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KAILASH BHAWAN</string>
+    <string name="title_activity_main">KAILASH BHAWAN</string>
+    <string name="package_name">com.kailashbhawan.app</string>
+    <string name="custom_url_scheme">com.kailashbhawan.app</string>
+</resources>

@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   User,
   QrCode,
+  Smartphone,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown.js';
 import { TabKey } from './Sidebar.js';
@@ -27,6 +28,7 @@ interface TopHeaderProps {
   onSelectTask?: (taskId: string) => void;
   onOpenLoginModal: () => void;
   onOpenPaymentModal?: () => void;
+  onOpenMobileAppModal?: () => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
@@ -38,6 +40,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   onSelectTask,
   onOpenLoginModal,
   onOpenPaymentModal,
+  onOpenMobileAppModal,
 }) => {
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -136,6 +139,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           >
             <QrCode className="w-4 h-4 text-amber-600 shrink-0" />
             <span className="hidden sm:inline">Scan & Pay</span>
+          </button>
+        )}
+
+        {/* Mobile App Download Button */}
+        {onOpenMobileAppModal && (
+          <button
+            onClick={onOpenMobileAppModal}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs transition-all focus:outline-none"
+            title="Download Android & iOS App"
+          >
+            <Smartphone className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="hidden sm:inline">Mobile App</span>
           </button>
         )}
 

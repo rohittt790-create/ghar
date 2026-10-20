@@ -16,7 +16,8 @@ import { PropertyFormModal } from './components/properties/PropertyFormModal.js'
 import { OwnerFormModal } from './components/owners/OwnerFormModal.js';
 import { LoginModal } from './components/auth/LoginModal.js';
 import { PaymentQrModal } from './components/payment/PaymentQrModal.js';
-import { HardHat, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
+import { MobileAppDownloadModal } from './components/mobile/MobileAppDownloadModal.js';
+import { HardHat, ShieldCheck, CheckCircle2, ArrowRight, Smartphone } from 'lucide-react';
 
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
@@ -28,6 +29,7 @@ const MainApp: React.FC = () => {
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isMobileAppModalOpen, setIsMobileAppModalOpen] = useState(false);
   const [paymentModalData, setPaymentModalData] = useState<{
     amount?: number;
     note?: string;
@@ -133,6 +135,15 @@ const MainApp: React.FC = () => {
             >
               Create New Account
             </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileAppModalOpen(true)}
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-400 font-bold text-xs transition-all border border-emerald-500/30 flex items-center justify-center gap-2 mt-1"
+            >
+              <Smartphone className="w-4 h-4 text-emerald-400" />
+              <span>Get Mobile App (Android & iOS)</span>
+            </button>
           </div>
         </div>
 
@@ -140,6 +151,11 @@ const MainApp: React.FC = () => {
           isOpen={isLoginModalOpen}
           onClose={() => setIsLoginModalOpen(false)}
           initialMode={authMode}
+        />
+
+        <MobileAppDownloadModal
+          isOpen={isMobileAppModalOpen}
+          onClose={() => setIsMobileAppModalOpen(false)}
         />
       </div>
     );
@@ -159,6 +175,7 @@ const MainApp: React.FC = () => {
         onCloseMobile={() => setMobileSidebarOpen(false)}
         onOpenLoginModal={() => openAuth('login')}
         onOpenPaymentModal={() => handleOpenPayment()}
+        onOpenMobileAppModal={() => setIsMobileAppModalOpen(true)}
       />
 
       {/* Main App Content Area */}
@@ -173,6 +190,7 @@ const MainApp: React.FC = () => {
           onSelectTask={handleSelectTaskFromAnywhere}
           onOpenLoginModal={() => openAuth('login')}
           onOpenPaymentModal={() => handleOpenPayment()}
+          onOpenMobileAppModal={() => setIsMobileAppModalOpen(true)}
         />
 
         {/* Dynamic View Body */}
@@ -262,6 +280,11 @@ const MainApp: React.FC = () => {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         initialMode={authMode}
+      />
+
+      <MobileAppDownloadModal
+        isOpen={isMobileAppModalOpen}
+        onClose={() => setIsMobileAppModalOpen(false)}
       />
     </div>
   );

@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ShieldCheck,
   User,
+  QrCode,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown.js';
 import { TabKey } from './Sidebar.js';
@@ -25,6 +26,7 @@ interface TopHeaderProps {
   onQuickAddTask: () => void;
   onSelectTask?: (taskId: string) => void;
   onOpenLoginModal: () => void;
+  onOpenPaymentModal?: () => void;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
@@ -35,6 +37,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   onQuickAddTask,
   onSelectTask,
   onOpenLoginModal,
+  onOpenPaymentModal,
 }) => {
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -124,6 +127,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {/* Notifications Dropdown */}
         <NotificationDropdown onSelectTask={onSelectTask} />
 
+        {/* Scan & Pay Button */}
+        {onOpenPaymentModal && (
+          <button
+            onClick={onOpenPaymentModal}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-xs transition-all focus:outline-none"
+            title="Scan to pay via UPI QR"
+          >
+            <QrCode className="w-4 h-4 text-amber-600 shrink-0" />
+            <span className="hidden sm:inline">Scan & Pay</span>
+          </button>
+        )}
+
         {/* Quick Add Menu */}
         <div className="relative">
           <button
@@ -171,6 +186,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                   <UserPlus className="w-4 h-4 text-purple-500" />
                   New Owner
                 </button>
+                {onOpenPaymentModal && (
+                  <button
+                    onClick={() => {
+                      setQuickMenuOpen(false);
+                      onOpenPaymentModal();
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs sm:text-sm font-medium text-amber-900 bg-amber-50/60 hover:bg-amber-100 flex items-center gap-2.5 transition-colors border-t border-slate-100 mt-1"
+                  >
+                    <QrCode className="w-4 h-4 text-amber-600" />
+                    Scan & Pay (UPI)
+                  </button>
+                )}
               </div>
             </>
           )}

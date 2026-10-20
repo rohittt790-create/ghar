@@ -12,6 +12,7 @@ import {
   LogIn,
   ShieldCheck,
   Layers,
+  QrCode,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNotifications } from '../../context/NotificationContext.js';
@@ -32,6 +33,7 @@ interface SidebarProps {
   mobileOpen?: boolean;
   onCloseMobile?: () => void;
   onOpenLoginModal?: () => void;
+  onOpenPaymentModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -40,6 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen = false,
   onCloseMobile,
   onOpenLoginModal,
+  onOpenPaymentModal,
 }) => {
   const { user, logout } = useAuth();
   const { totalAlerts } = useNotifications();
@@ -171,6 +174,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           })}
         </div>
+
+        {/* Instant UPI Payment Action Card */}
+        {onOpenPaymentModal && (
+          <div className="px-3 pb-3">
+            <button
+              onClick={onOpenPaymentModal}
+              className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-amber-600/20 via-amber-500/10 to-amber-600/20 border border-amber-500/30 hover:border-amber-400 text-left transition-all group shadow-xs"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/40 group-hover:scale-105 transition-transform">
+                  <QrCode className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider">UPI QR Pay</span>
+                    <span className="text-[9px] text-emerald-400 font-bold bg-emerald-500/10 px-1 rounded">Instant</span>
+                  </div>
+                  <p className="text-xs font-bold text-white truncate">Pay via QR Code</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* User Card & Sign In / Sign Out */}
         <div className="p-3 border-t border-slate-800/80 bg-slate-950/40">

@@ -23,9 +23,14 @@ import {
   Smartphone,
   Mail,
   Globe,
+  QrCode,
 } from 'lucide-react';
 
-export const RemindersView: React.FC = () => {
+interface RemindersViewProps {
+  onOpenPaymentModal?: (data?: { amount?: number; propertyName?: string; taskName?: string }) => void;
+}
+
+export const RemindersView: React.FC<RemindersViewProps> = ({ onOpenPaymentModal }) => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -233,6 +238,7 @@ export const RemindersView: React.FC = () => {
           <div className="divide-y divide-slate-100">
             {reminders.map((rem) => {
               const propObj = typeof rem.property === 'object' ? rem.property : null;
+              const taskObj = typeof rem.task === 'object' ? rem.task : null;
 
               return (
                 <div
@@ -300,6 +306,23 @@ export const RemindersView: React.FC = () => {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
+                    {rem.type === 'payment' && onOpenPaymentModal && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="bg-amber-600 hover:bg-amber-700 text-xs"
+                        onClick={() =>
+                          onOpenPaymentModal({
+                            propertyName: propObj?.name,
+                            taskName: taskObj?.taskName || rem.title,
+                          })
+                        }
+                      >
+                        <QrCode className="w-3.5 h-3.5" />
+                        Pay via QR
+                      </Button>
+                    )}
+
                     {rem.status === 'pending' && (
                       <Button
                         variant="outline"

@@ -33,6 +33,7 @@ import {
   Bed,
   Bath,
   Filter,
+  QrCode,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DashboardSummary, Task, PhotoStage, Floor } from '../../types/index.js';
@@ -50,6 +51,7 @@ interface DashboardViewProps {
   onOpenAddProperty: () => void;
   onOpenAddOwner: () => void;
   onSelectTask: (taskId: string) => void;
+  onOpenPaymentModal?: (data?: { amount?: number; propertyName?: string; taskName?: string }) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -58,6 +60,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenAddProperty,
   onOpenAddOwner,
   onSelectTask,
+  onOpenPaymentModal,
 }) => {
   const { user } = useAuth();
   const [data, setData] = useState<DashboardSummary | null>(null);
@@ -826,9 +829,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <p className="text-xs font-semibold text-purple-700 mt-1">
             Spent: {formatCurrency(financials.totalSpent || 0)} (100% In Reserve)
           </p>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700 group-hover:translate-x-0.5 transition-transform">
-            <span>Audit Ledger</span>
-            <ChevronRight className="w-4 h-4" />
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs font-bold text-purple-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              <span>Audit Ledger</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+            {onOpenPaymentModal && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenPaymentModal();
+                }}
+                className="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 text-[11px] font-bold border border-amber-300 flex items-center gap-1 shadow-xs transition-colors"
+              >
+                <QrCode className="w-3.5 h-3.5 text-amber-600" />
+                <span>Pay via QR</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

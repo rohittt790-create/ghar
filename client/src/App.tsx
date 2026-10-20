@@ -15,6 +15,7 @@ import { TaskFormModal } from './components/tasks/TaskFormModal.js';
 import { PropertyFormModal } from './components/properties/PropertyFormModal.js';
 import { OwnerFormModal } from './components/owners/OwnerFormModal.js';
 import { LoginModal } from './components/auth/LoginModal.js';
+import { PaymentQrModal } from './components/payment/PaymentQrModal.js';
 import { HardHat, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 const MainApp: React.FC = () => {
@@ -26,6 +27,13 @@ const MainApp: React.FC = () => {
   const [isPropertyModalOpen, setIsPropertyModalOpen] = useState(false);
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentModalData, setPaymentModalData] = useState<{
+    amount?: number;
+    note?: string;
+    propertyName?: string;
+    taskName?: string;
+  }>({});
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Navigation state passed between tabs
@@ -47,6 +55,16 @@ const MainApp: React.FC = () => {
   const handleExploreStructure = (propertyId?: string) => {
     if (propertyId) setSelectedPropertyId(propertyId);
     setActiveTab('structure');
+  };
+
+  const handleOpenPayment = (data?: {
+    amount?: number;
+    note?: string;
+    propertyName?: string;
+    taskName?: string;
+  }) => {
+    setPaymentModalData(data || {});
+    setIsPaymentModalOpen(true);
   };
 
   const openAuth = (mode: 'login' | 'register') => {
@@ -140,6 +158,7 @@ const MainApp: React.FC = () => {
         mobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
         onOpenLoginModal={() => openAuth('login')}
+        onOpenPaymentModal={() => handleOpenPayment()}
       />
 
       {/* Main App Content Area */}
@@ -153,6 +172,7 @@ const MainApp: React.FC = () => {
           onQuickAddTask={() => setIsTaskModalOpen(true)}
           onSelectTask={handleSelectTaskFromAnywhere}
           onOpenLoginModal={() => openAuth('login')}
+          onOpenPaymentModal={() => handleOpenPayment()}
         />
 
         {/* Dynamic View Body */}
@@ -164,6 +184,7 @@ const MainApp: React.FC = () => {
               onOpenAddProperty={() => setIsPropertyModalOpen(true)}
               onOpenAddOwner={() => setIsOwnerModalOpen(true)}
               onSelectTask={handleSelectTaskFromAnywhere}
+              onOpenPaymentModal={handleOpenPayment}
             />
           )}
 
@@ -201,13 +222,23 @@ const MainApp: React.FC = () => {
             <CalendarView onSelectTask={handleSelectTaskFromAnywhere} />
           )}
 
-          {activeTab === 'reminders' && <RemindersView />}
+          {activeTab === 'reminders' && (
+            <RemindersView onOpenPaymentModal={handleOpenPayment} />
+          )}
 
           {activeTab === 'reports' && <ReportsView />}
         </main>
       </div>
 
       {/* Quick Action Modals */}
+      <PaymentQrModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        initialAmount={paymentModalData.amount}
+        initialNote={paymentModalData.note}
+        propertyName={paymentModalData.propertyName}
+        taskName={paymentModalData.taskName}
+      />
       <TaskFormModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}

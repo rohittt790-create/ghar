@@ -29,10 +29,14 @@ import {
   Maximize2,
   Eye,
   Share2,
+  DoorOpen,
+  Bed,
+  Bath,
+  Filter,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { DashboardSummary, Task, PhotoStage } from '../../types/index.js';
-import { dashboardApi, tasksApi } from '../../services/api.js';
+import { DashboardSummary, Task, PhotoStage, Floor } from '../../types/index.js';
+import { dashboardApi, tasksApi, structureApi } from '../../services/api.js';
 import { Badge } from '../common/Badge.js';
 import { Button } from '../common/Button.js';
 import { LoadingSpinner } from '../common/LoadingSpinner.js';
@@ -62,10 +66,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [activeTab, setActiveTab] = useState<'alerts' | 'deadlines' | 'photos' | 'activity'>('deadlines');
   const [previewPhoto, setPreviewPhoto] = useState<{ url: string; caption?: string; stage?: string; taskName?: string } | null>(null);
 
-  const fetchSummary = async () => {
+  // Property and Floor structure filters for dashboard
+  const [filterPropertyId, setFilterPropertyId] = useState<string>('');
+  const [filterFloorId, setFilterFloorId] = useState<string>('');
+  const [availableFloors, setAvailableFloors] = useState<Floor[]>([]);
+
+  const fetchSummary = async (propId = filterPropertyId, flId = filterFloorId) => {
     try {
       setLoading(true);
-      const summary = await dashboardApi.getSummary();
+      const summary = await dashboardApi.getSummary({
+        propertyId: propId || undefined,
+        floorId: flId || undefined,
+      });
       setData(summary);
     } catch (err) {
       console.error('[Dashboard] Error fetching summary:', err);
@@ -76,7 +88,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   useEffect(() => {
     fetchSummary();
-  }, []);
+  }, [filterPropertyId, filterFloorId]);
+
+  // Load floors when property filter changes
+  useEffect(() => {
+    if (filterPropertyId) {
+      structureApi
+        .getFloors(filterPropertyId)
+        .then((res) => {
+          if (res.success) {
+            setAvailableFloors(res.floors);
+          }
+        })
+        .catch(() => setAvailableFloors([]));
+    } else {
+      setAvailableFloors([]);
+      setFilterFloorId('');
+    }
+  }, [filterPropertyId]);
 
   const handleQuickComplete = async (task: Task, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -119,7 +148,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <p className="text-sm text-slate-500 mt-2">
           Unable to establish communication with the database engine. Please check your connection.
         </p>
-        <Button variant="primary" className="mt-6 font-bold shadow-md" onClick={fetchSummary}>
+        <Button variant="primary" className="mt-6 font-bold shadow-md" onClick={() => fetchSummary()}>
           Reconnect Dashboard
         </Button>
       </div>
@@ -800,6 +829,172 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700 group-hover:translate-x-0.5 transition-transform">
             <span>Audit Ledger</span>
             <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
+      </div>
+
+      {/* ======================================================== */}
+      {/* 4.5 HOUSE STRUCTURE, ROOMS & RESIDENTS COMMAND */}
+      {/* ======================================================== */}
+      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-600">
+                ARCHITECTURAL TELEMETRY
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-xs font-bold text-slate-500">Live Structure & Occupancy Status</span>
+            </div>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <Layers className="w-5 h-5 text-amber-600" />
+              House Structure, Rooms & Residents
+            </h3>
+          </div>
+
+          {/* Filters & Navigation */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Property Filter */}
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={filterPropertyId}
+                onChange={(e) => {
+                  setFilterPropertyId(e.target.value);
+                  setFilterFloorId('');
+                }}
+                className="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer"
+              >
+                <option value="">All Estates</option>
+                {data.properties?.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Floor Filter */}
+            {filterPropertyId && availableFloors.length > 0 && (
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs">
+                <Layers className="w-3.5 h-3.5 text-slate-400" />
+                <select
+                  value={filterFloorId}
+                  onChange={(e) => setFilterFloorId(e.target.value)}
+                  className="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer"
+                >
+                  <option value="">All Floors</option>
+                  {availableFloors.map((fl) => (
+                    <option key={fl._id} value={fl._id}>
+                      {fl.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => onNavigateTab('structure')}
+              className="bg-amber-600 hover:bg-amber-700 text-xs font-bold flex items-center gap-1.5 shadow-xs"
+            >
+              <span>Explore Structure & Rooms</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* 7 Required Structure Metrics Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+          {/* Total Floors */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Floors</span>
+              <Layers className="w-3.5 h-3.5 text-amber-600" />
+            </div>
+            <span className="text-2xl font-black text-slate-900">
+              {data.structure?.totalFloors ?? 0}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Levels configured</span>
+          </div>
+
+          {/* Total Rooms */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Total Rooms</span>
+              <DoorOpen className="w-3.5 h-3.5 text-blue-600" />
+            </div>
+            <span className="text-2xl font-black text-slate-900">
+              {data.structure?.totalRooms ?? 0}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Measured spaces</span>
+          </div>
+
+          {/* Total Bedrooms */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Bedrooms</span>
+              <Bed className="w-3.5 h-3.5 text-indigo-600" />
+            </div>
+            <span className="text-2xl font-black text-slate-900">
+              {data.structure?.totalBedrooms ?? 0}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Suites & rooms</span>
+          </div>
+
+          {/* Total Bathrooms */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Bathrooms</span>
+              <Bath className="w-3.5 h-3.5 text-emerald-600" />
+            </div>
+            <span className="text-2xl font-black text-slate-900">
+              {data.structure?.totalBathrooms ?? 0}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Ensuites & common</span>
+          </div>
+
+          {/* Active Residents */}
+          <div className="p-3.5 rounded-2xl bg-purple-50/70 border border-purple-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-purple-600 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Residents</span>
+              <Users className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-2xl font-black text-purple-900">
+              {data.structure?.totalActiveResidents ?? 0}
+            </span>
+            <span className="text-[10px] text-purple-700 font-medium mt-0.5">Distinct living</span>
+          </div>
+
+          {/* Occupied vs Vacant */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Occ / Vacant</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-black text-blue-700">
+                {data.structure?.occupiedBedrooms ?? 0}
+              </span>
+              <span className="text-slate-400 text-xs">/</span>
+              <span className="text-xl font-black text-emerald-700">
+                {data.structure?.vacantBedrooms ?? 0}
+              </span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-medium mt-0.5">Bedrooms status</span>
+          </div>
+
+          {/* Under Maintenance / Construction */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-amber-700 mb-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider">Maintenance</span>
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+            </div>
+            <span className="text-2xl font-black text-amber-900">
+              {data.structure?.roomsUnderMaintenance ?? 0}
+            </span>
+            <span className="text-[10px] text-amber-700 font-medium mt-0.5">Under work or snag</span>
           </div>
         </div>
       </div>

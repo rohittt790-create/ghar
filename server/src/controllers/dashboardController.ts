@@ -2,6 +2,9 @@ import { Response } from 'express';
 import { Owner } from '../models/Owner.js';
 import { Property } from '../models/Property.js';
 import { Task } from '../models/Task.js';
+import { Floor } from '../models/Floor.js';
+import { Room } from '../models/Room.js';
+import { Resident } from '../models/Resident.js';
 import { AuthRequest } from '../middleware/auth.js';
 
 export const getDashboardSummary = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -110,6 +113,56 @@ export const getDashboardSummary = async (req: AuthRequest, res: Response): Prom
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
+    // House Structure & Residents telemetry
+    const { propertyId, floorId } = req.query as { propertyId?: string; floorId?: string };
+    const floorQuery: any = { createdBy: userId };
+    const roomQuery: any = { createdBy: userId };
+    const residentQuery: any = { createdBy: userId, status: 'currently_living' };
+
+    if (propertyId) {
+      floorQuery.property = propertyId;
+      roomQuery.property = propertyId;
+      residentQuery.property = propertyId;
+    }
+    if (floorId) {
+      roomQuery.floor = floorId;
+      residentQuery.currentFloor = floorId;
+    }
+
+    const [totalFloors, allRooms, activeResidents] = await Promise.all([
+      Floor.countDocuments(floorQuery),
+      Room.find(roomQuery),
+      Resident.find(residentQuery),
+    ]);
+
+    const totalRooms = allRooms.length;
+    const totalBedrooms = allRooms.filter(
+      (r) => r.roomType === 'bedroom' || r.roomType === 'master_bedroom'
+    ).length;
+    const totalBathrooms = allRooms.filter((r) => r.roomType === 'bathroom').length;
+    const totalActiveResidents = activeResidents.length;
+
+    const activeResidentRoomIds = new Set(
+      activeResidents
+        .filter((r) => r.currentRoom)
+        .map((r) => r.currentRoom!.toString())
+    );
+
+    const bedrooms = allRooms.filter(
+      (r) => r.roomType === 'bedroom' || r.roomType === 'master_bedroom'
+    );
+    const occupiedBedrooms = bedrooms.filter((b) =>
+      activeResidentRoomIds.has(b._id.toString())
+    ).length;
+    const vacantBedrooms = Math.max(0, bedrooms.length - occupiedBedrooms);
+
+    const roomsUnderMaintenance = allRooms.filter(
+      (r) =>
+        r.constructionStatus === 'in_progress' ||
+        r.constructionStatus === 'needs_repair' ||
+        r.occupancyStatus === 'under_maintenance'
+    ).length;
+
     res.status(200).json({
       success: true,
       counts: {
@@ -121,6 +174,16 @@ export const getDashboardSummary = async (req: AuthRequest, res: Response): Prom
         notStartedTasks,
         onHoldTasks,
         overdueTasksCount: overdueTasks.length,
+      },
+      structure: {
+        totalFloors,
+        totalRooms,
+        totalBedrooms,
+        totalBathrooms,
+        totalActiveResidents,
+        occupiedBedrooms,
+        vacantBedrooms,
+        roomsUnderMaintenance,
       },
       overallProgress,
       financials: {

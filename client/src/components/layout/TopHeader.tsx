@@ -66,6 +66,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       title: 'Property Sites',
       subtitle: 'Track build progress, budgets, site photos, and completion schedules.',
     },
+    structure: {
+      title: 'House Structure & Rooms',
+      subtitle: 'Oversee floors, room dimensions, finishes checklist, and household residents.',
+    },
     tasks: {
       title: 'Construction Work & Tasks',
       subtitle: 'Manage site tasks, upload progress photos, track history & costs.',

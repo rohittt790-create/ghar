@@ -11,6 +11,7 @@ import {
   LogOut,
   LogIn,
   ShieldCheck,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNotifications } from '../../context/NotificationContext.js';
@@ -19,6 +20,7 @@ export type TabKey =
   | 'dashboard'
   | 'owners'
   | 'properties'
+  | 'structure'
   | 'tasks'
   | 'calendar'
   | 'reminders'
@@ -59,6 +61,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       key: 'properties' as TabKey,
       label: 'Properties',
       icon: <Building2 className="w-5 h-5" />,
+      badge: undefined,
+    },
+    {
+      key: 'structure' as TabKey,
+      label: 'House Structure & Rooms',
+      icon: <Layers className="w-5 h-5" />,
       badge: undefined,
     },
     {

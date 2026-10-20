@@ -18,6 +18,7 @@ const taskRoutes_js_1 = __importDefault(require("./routes/taskRoutes.js"));
 const reminderRoutes_js_1 = __importDefault(require("./routes/reminderRoutes.js"));
 const reportRoutes_js_1 = __importDefault(require("./routes/reportRoutes.js"));
 const dashboardRoutes_js_1 = __importDefault(require("./routes/dashboardRoutes.js"));
+const structureRoutes_js_1 = __importDefault(require("./routes/structureRoutes.js"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5001;
@@ -66,6 +67,7 @@ app.use(['/api/tasks', '/tasks'], taskRoutes_js_1.default);
 app.use(['/api/reminders', '/reminders'], reminderRoutes_js_1.default);
 app.use(['/api/reports', '/reports'], reportRoutes_js_1.default);
 app.use(['/api/dashboard', '/dashboard'], dashboardRoutes_js_1.default);
+app.use(['/api/structure', '/structure'], structureRoutes_js_1.default);
 // Health check endpoint (fast, returns immediately)
 app.get(['/api/health', '/health'], (_req, res) => {
     const dbState = mongoose_1.default.connection.readyState;

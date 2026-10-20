@@ -14,6 +14,7 @@ import taskRoutes from './routes/taskRoutes.js';
 import reminderRoutes from './routes/reminderRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import structureRoutes from './routes/structureRoutes.js';
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ app.use(['/api/tasks', '/tasks'], taskRoutes);
 app.use(['/api/reminders', '/reminders'], reminderRoutes);
 app.use(['/api/reports', '/reports'], reportRoutes);
 app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
+app.use(['/api/structure', '/structure'], structureRoutes);
 
 // Health check endpoint (fast, returns immediately)
 app.get(['/api/health', '/health'], (_req, res) => {

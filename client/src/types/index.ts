@@ -176,6 +176,16 @@ export interface DashboardSummary {
     onHoldTasks: number;
     overdueTasksCount: number;
   };
+  structure?: {
+    totalFloors: number;
+    totalRooms: number;
+    totalBedrooms: number;
+    totalBathrooms: number;
+    totalActiveResidents: number;
+    occupiedBedrooms: number;
+    vacantBedrooms: number;
+    roomsUnderMaintenance: number;
+  };
   overallProgress: number;
   financials: {
     totalBudget: number;
@@ -257,4 +267,175 @@ export interface MonthlyReportData {
     uploadedAt: string;
   }>;
   tasks: Task[];
+}
+
+export type FloorStatus = 'not_started' | 'in_progress' | 'completed';
+
+export type RoomType =
+  | 'bedroom'
+  | 'master_bedroom'
+  | 'living_room'
+  | 'hall'
+  | 'kitchen'
+  | 'bathroom'
+  | 'dining_room'
+  | 'study_room'
+  | 'store_room'
+  | 'utility_room'
+  | 'balcony'
+  | 'pooja_room'
+  | 'other';
+
+export type RoomConstructionStatus = 'not_started' | 'in_progress' | 'completed' | 'needs_repair';
+export type RoomInteriorStatus = 'not_started' | 'in_progress' | 'completed';
+export type RoomOccupancyStatus = 'occupied' | 'vacant' | 'under_maintenance';
+export type TradeStatus = 'not_started' | 'in_progress' | 'completed' | 'not_applicable';
+
+export interface RoomChecklist {
+  electrical: TradeStatus;
+  plumbing: TradeStatus;
+  flooring: TradeStatus;
+  painting: TradeStatus;
+  doors: TradeStatus;
+  windows: TradeStatus;
+}
+
+export interface RoomDefect {
+  _id?: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  reportedAt: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  resolutionNotes?: string;
+  photo?: string;
+}
+
+export interface FloorStats {
+  roomsCount: number;
+  bathroomsCount: number;
+  bedroomsCount: number;
+  balconiesCount: number;
+  kitchensCount: number;
+  livingHallsCount: number;
+  otherSpacesCount: number;
+  totalAreaSqFt: number;
+}
+
+export interface Floor {
+  _id: string;
+  property: string | Property;
+  floorNumber: number;
+  name: string;
+  floorPlanImage?: string;
+  floorPhotos: string[];
+  status: FloorStatus;
+  progressPercentage: number;
+  notes?: string;
+  stats?: FloorStats;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Room {
+  _id: string;
+  property: string | Property;
+  floor: Floor | string;
+  roomId: string;
+  name: string;
+  roomType: RoomType;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  areaSqFt: number;
+  photos: string[];
+  floorPlanLocation?: {
+    x?: number;
+    y?: number;
+    label?: string;
+  };
+  constructionStatus: RoomConstructionStatus;
+  interiorStatus: RoomInteriorStatus;
+  checklist: RoomChecklist;
+  occupancyStatus: RoomOccupancyStatus;
+  defects: RoomDefect[];
+  notes?: string;
+  activeOccupants?: Array<{
+    _id: string;
+    name: string;
+    relationship: string;
+    profilePhoto?: string;
+    phone?: string;
+    moveInDate?: string;
+  }>;
+  occupantsCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ResidentRelationship =
+  | 'owner'
+  | 'spouse'
+  | 'child'
+  | 'parent'
+  | 'relative'
+  | 'tenant'
+  | 'other';
+
+export type ResidentStatus = 'currently_living' | 'temporarily_away' | 'moved_out';
+
+export interface ResidentAssignmentHistory {
+  _id?: string;
+  floor?: Floor | string;
+  floorName?: string;
+  room?: Room | string;
+  roomName?: string;
+  roomId?: string;
+  assignedAt: string;
+  vacatedAt?: string;
+  reason?: string;
+}
+
+export interface Resident {
+  _id: string;
+  property: string | Property;
+  name: string;
+  profilePhoto?: string;
+  relationship: ResidentRelationship;
+  dob?: string;
+  age?: number;
+  phone?: string;
+  email?: string;
+  currentFloor?: Floor | string;
+  currentRoom?: Room | string;
+  moveInDate?: string;
+  moveOutDate?: string;
+  status: ResidentStatus;
+  notes?: string;
+  assignmentHistory: ResidentAssignmentHistory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HouseStructureOverview {
+  property: Property;
+  floorsCount: number;
+  roomsCount: number;
+  bathroomsCount: number;
+  bedroomsCount: number;
+  balconiesCount: number;
+  kitchensCount: number;
+  livingRoomsCount: number;
+  otherSpacesCount: number;
+  totalAreaSqFt: number;
+  activeResidentsCount: number;
+  occupiedBedroomsCount: number;
+  vacantBedroomsCount: number;
+  roomsUnderMaintenanceCount: number;
+  constructionProgressPercentage: number;
+  floors: Floor[];
+  rooms: Room[];
+  residents: Resident[];
 }

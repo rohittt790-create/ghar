@@ -10,6 +10,7 @@ import { TasksView } from './components/tasks/TasksView.js';
 import { CalendarView } from './components/calendar/CalendarView.js';
 import { RemindersView } from './components/reminders/RemindersView.js';
 import { ReportsView } from './components/reports/ReportsView.js';
+import { HouseStructureView } from './components/structure/HouseStructureView.js';
 import { TaskFormModal } from './components/tasks/TaskFormModal.js';
 import { PropertyFormModal } from './components/properties/PropertyFormModal.js';
 import { OwnerFormModal } from './components/owners/OwnerFormModal.js';
@@ -41,6 +42,11 @@ const MainApp: React.FC = () => {
   const handleViewPropertyFromOwner = (propertyId: string) => {
     setSelectedPropertyId(propertyId);
     setActiveTab('properties');
+  };
+
+  const handleExploreStructure = (propertyId?: string) => {
+    if (propertyId) setSelectedPropertyId(propertyId);
+    setActiveTab('structure');
   };
 
   const openAuth = (mode: 'login' | 'register') => {
@@ -174,9 +180,14 @@ const MainApp: React.FC = () => {
                 setIsTaskModalOpen(true);
               }}
               onSelectTask={handleSelectTaskFromAnywhere}
+              onExploreStructure={handleExploreStructure}
               selectedPropertyId={selectedPropertyId}
               onClearSelectedProperty={() => setSelectedPropertyId(null)}
             />
+          )}
+
+          {activeTab === 'structure' && (
+            <HouseStructureView initialPropertyId={selectedPropertyId || undefined} />
           )}
 
           {activeTab === 'tasks' && (

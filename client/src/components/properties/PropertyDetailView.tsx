@@ -27,6 +27,7 @@ interface PropertyDetailViewProps {
   onEditProperty: (property: Property) => void;
   onAddTaskForProperty: (propertyId: string) => void;
   onSelectTask: (taskId: string) => void;
+  onExploreStructure?: (propertyId: string) => void;
 }
 
 export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({
@@ -35,6 +36,7 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({
   onEditProperty,
   onAddTaskForProperty,
   onSelectTask,
+  onExploreStructure,
 }) => {
   const [taskFilter, setTaskFilter] = useState<string>('all');
   const [activePhoto, setActivePhoto] = useState<string>(
@@ -72,6 +74,17 @@ export const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({
         </button>
 
         <div className="flex items-center gap-2">
+          {onExploreStructure && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
+              icon={<Layers className="w-3.5 h-3.5 text-amber-600" />}
+              onClick={() => onExploreStructure(property._id)}
+            >
+              Structure & Rooms
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

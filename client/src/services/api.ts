@@ -8,6 +8,10 @@ import {
   DashboardSummary,
   MonthlyReportData,
   TaskStatus,
+  Floor,
+  Room,
+  Resident,
+  HouseStructureOverview,
 } from '../types/index.js';
 
 const api = axios.create({
@@ -211,8 +215,134 @@ export const reportsApi = {
 };
 
 export const dashboardApi = {
-  getSummary: async () => {
-    const res = await api.get<DashboardSummary>('/dashboard/summary');
+  getSummary: async (params?: { propertyId?: string; floorId?: string }) => {
+    const res = await api.get<DashboardSummary>('/dashboard/summary', { params });
+    return res.data;
+  },
+};
+
+export const structureApi = {
+  getOverview: async (propertyId: string) => {
+    const res = await api.get<{ success: boolean; data: HouseStructureOverview }>(
+      `/structure/properties/${propertyId}/overview`
+    );
+    return res.data;
+  },
+  getFloors: async (propertyId: string) => {
+    const res = await api.get<{ success: boolean; count: number; floors: Floor[] }>(
+      `/structure/properties/${propertyId}/floors`
+    );
+    return res.data;
+  },
+  createFloor: async (propertyId: string, data: any) => {
+    const res = await api.post<{ success: boolean; floor: Floor }>(
+      `/structure/properties/${propertyId}/floors`,
+      data
+    );
+    return res.data;
+  },
+  updateFloor: async (floorId: string, data: any) => {
+    const res = await api.put<{ success: boolean; floor: Floor }>(
+      `/structure/floors/${floorId}`,
+      data
+    );
+    return res.data;
+  },
+  deleteFloor: async (floorId: string) => {
+    const res = await api.delete<{ success: boolean; message: string }>(
+      `/structure/floors/${floorId}`
+    );
+    return res.data;
+  },
+  getRooms: async (
+    propertyId: string,
+    params?: {
+      floorId?: string;
+      roomType?: string;
+      constructionStatus?: string;
+      occupancyStatus?: string;
+      search?: string;
+    }
+  ) => {
+    const res = await api.get<{ success: boolean; count: number; rooms: Room[] }>(
+      `/structure/properties/${propertyId}/rooms`,
+      { params }
+    );
+    return res.data;
+  },
+  createRoom: async (propertyId: string, data: any) => {
+    const res = await api.post<{ success: boolean; room: Room }>(
+      `/structure/properties/${propertyId}/rooms`,
+      data
+    );
+    return res.data;
+  },
+  updateRoom: async (roomId: string, data: any) => {
+    const res = await api.put<{ success: boolean; room: Room }>(
+      `/structure/rooms/${roomId}`,
+      data
+    );
+    return res.data;
+  },
+  deleteRoom: async (roomId: string) => {
+    const res = await api.delete<{ success: boolean; message: string }>(
+      `/structure/rooms/${roomId}`
+    );
+    return res.data;
+  },
+  addDefect: async (roomId: string, data: { description: string; severity?: string; photo?: string }) => {
+    const res = await api.post<{ success: boolean; room: Room }>(
+      `/structure/rooms/${roomId}/defects`,
+      data
+    );
+    return res.data;
+  },
+  resolveDefect: async (roomId: string, defectId: string, resolutionNotes?: string) => {
+    const res = await api.put<{ success: boolean; room: Room }>(
+      `/structure/rooms/${roomId}/defects/${defectId}/resolve`,
+      { resolutionNotes }
+    );
+    return res.data;
+  },
+  getResidents: async (propertyId: string, params?: { status?: string; search?: string }) => {
+    const res = await api.get<{ success: boolean; count: number; residents: Resident[] }>(
+      `/structure/properties/${propertyId}/residents`,
+      { params }
+    );
+    return res.data;
+  },
+  createResident: async (propertyId: string, data: any) => {
+    const res = await api.post<{ success: boolean; resident: Resident }>(
+      `/structure/properties/${propertyId}/residents`,
+      data
+    );
+    return res.data;
+  },
+  updateResident: async (residentId: string, data: any) => {
+    const res = await api.put<{ success: boolean; resident: Resident }>(
+      `/structure/residents/${residentId}`,
+      data
+    );
+    return res.data;
+  },
+  reassignResident: async (residentId: string, data: { floorId?: string; roomId?: string; reason?: string }) => {
+    const res = await api.put<{ success: boolean; resident: Resident }>(
+      `/structure/residents/${residentId}/reassign`,
+      data
+    );
+    return res.data;
+  },
+  markResidentMoveOut: async (residentId: string, data: { moveOutDate?: string; notes?: string }) => {
+    const res = await api.put<{ success: boolean; resident: Resident }>(
+      `/structure/residents/${residentId}/move-out`,
+      data
+    );
+    return res.data;
+  },
+  deleteResident: async (residentId: string) => {
+    const res = await api.delete<{ success: boolean; message: string }>(
+      `/structure/residents/${residentId}`
+    );
     return res.data;
   },
 };

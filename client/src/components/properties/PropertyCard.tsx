@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Edit2,
   Trash2,
+  Layers,
 } from 'lucide-react';
 
 interface PropertyCardProps {
@@ -17,6 +18,7 @@ interface PropertyCardProps {
   onViewDetails: (property: Property) => void;
   onEdit: (property: Property) => void;
   onDelete: (id: string, name: string) => void;
+  onExploreStructure?: (property: Property) => void;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -24,6 +26,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onViewDetails,
   onEdit,
   onDelete,
+  onExploreStructure,
 }) => {
   const ownerObj = typeof property.owner === 'object' ? property.owner : null;
   const overdueCount = property.overdueTasks || 0;
@@ -150,14 +153,23 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       </div>
 
       {/* Footer Details Button */}
-      <div className="px-4 pb-4 pt-1">
+      <div className="px-4 pb-4 pt-1 flex gap-2">
         <button
           onClick={() => onViewDetails(property)}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
         >
-          <span>View Site Details & Work Breakdown</span>
+          <span>Details</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
+        {onExploreStructure && (
+          <button
+            onClick={() => onExploreStructure(property)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 transition-colors border border-amber-200"
+          >
+            <Layers className="w-3.5 h-3.5 text-amber-600" />
+            <span>Structure</span>
+          </button>
+        )}
       </div>
     </div>
   );

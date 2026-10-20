@@ -25,6 +25,7 @@ interface PropertiesViewProps {
   onClearCreateModalTrigger?: () => void;
   selectedPropertyId?: string | null;
   onClearSelectedProperty?: () => void;
+  onExploreStructure?: (propertyId: string) => void;
 }
 
 export const PropertiesView: React.FC<PropertiesViewProps> = ({
@@ -34,6 +35,7 @@ export const PropertiesView: React.FC<PropertiesViewProps> = ({
   onClearCreateModalTrigger,
   selectedPropertyId,
   onClearSelectedProperty,
+  onExploreStructure,
 }) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [owners, setOwners] = useState<Owner[]>([]);
@@ -158,6 +160,7 @@ export const PropertiesView: React.FC<PropertiesViewProps> = ({
         }}
         onAddTaskForProperty={onAddTaskForProperty}
         onSelectTask={onSelectTask}
+        onExploreStructure={onExploreStructure}
       />
     );
   }
@@ -305,6 +308,7 @@ export const PropertiesView: React.FC<PropertiesViewProps> = ({
               key={property._id}
               property={property}
               onViewDetails={handleViewDetails}
+              onExploreStructure={(p) => onExploreStructure?.(p._id)}
               onEdit={(p) => {
                 setPropertyToEdit(p);
                 setIsFormOpen(true);

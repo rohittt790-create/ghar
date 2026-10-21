@@ -55,20 +55,11 @@ jobs:
       - name: Build Android Debug APK
         run: |
           cd client/android
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle-build.log
-
-      - name: Upload Build Log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-build-log
-          path: client/android/gradle-build.log
-
-      - name: Copy & Rename APK
-        run: |
-          APK_PATH=$(find client/android/app/build/outputs/apk -name "*.apk" | head -n 1)
-          echo "Found APK at: $APK_PATH"
-          cp "$APK_PATH" ./kailash-bhawan.apk
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+          echo "=== APK OUTPUT DIRECTORY ==="
+          ls -la app/build/outputs/apk/debug/
+          cp app/build/outputs/apk/debug/app-debug.apk ../../kailash-bhawan.apk
+          cd ../..
           ls -lh ./kailash-bhawan.apk
 
       - name: Upload Debug APK Artifact
@@ -76,7 +67,7 @@ jobs:
         with:
           name: kailash-bhawan-apk
           path: ./kailash-bhawan.apk
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
@@ -95,10 +86,10 @@ jobs:
             - **[kailash-bhawan.apk](https://github.com/rohittt790-create/ghar/releases/download/v1.0.0/kailash-bhawan.apk)**
 
             ### 📲 How to Install:
-            1. Download `kailash-bhawan.apk`.
-            2. Tap the downloaded file in your browser or Downloads folder.
-            3. Tap **Install** (allow installation from this source if prompted).
-            4. Open KAILASH BHAWAN!
+            1. Tap the direct download link on your phone.
+            2. Open the downloaded `kailash-bhawan.apk` file.
+            3. Tap **Install** (if prompted, enable *“Allow installation from this source”*).
+            4. Launch KAILASH BHAWAN and enjoy!
           files: |
             kailash-bhawan.apk
         env:

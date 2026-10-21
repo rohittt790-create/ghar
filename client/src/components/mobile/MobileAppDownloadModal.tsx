@@ -9,10 +9,9 @@ import {
   ExternalLink,
   ShieldCheck,
   Sparkles,
-  QrCode,
-  Layers,
-  ArrowRight,
   HardHat,
+  ArrowUpRight,
+  Info,
 } from 'lucide-react';
 
 interface MobileAppDownloadModalProps {
@@ -27,11 +26,23 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
   const [activePlatform, setActivePlatform] = useState<'android' | 'ios' | 'pwa'>('android');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showAddressBarTip, setShowAddressBarTip] = useState(false);
+
+  // Direct APK download URL from GitHub Releases
+  const APK_DOWNLOAD_URL = 'https://github.com/rohittt790-create/ghar/releases/download/v1.0.0/kailash-bhawan.apk';
+  const GITHUB_ACTIONS_URL = 'https://github.com/rohittt790-create/ghar/actions';
 
   useEffect(() => {
+    // Check if prompt was captured globally in index.html
+    const globalPrompt = (window as any).__pwaInstallPrompt;
+    if (globalPrompt) {
+      setDeferredPrompt(globalPrompt);
+    }
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      (window as any).__pwaInstallPrompt = e;
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -43,18 +54,27 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
-  }, []);
+  }, [isOpen]);
 
   const handlePwaInstall = async () => {
-    if (!deferredPrompt) {
-      alert('PWA installation is ready! If on Chrome/Edge, click the install icon in your browser address bar.');
-      return;
-    }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
+    const promptEvent = deferredPrompt || (window as any).__pwaInstallPrompt;
+
+    if (promptEvent && typeof promptEvent.prompt === 'function') {
+      try {
+        promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
+        if (outcome === 'accepted') {
+          setIsInstalled(true);
+          setDeferredPrompt(null);
+          (window as any).__pwaInstallPrompt = null;
+        }
+      } catch (err) {
+        console.error('PWA install prompt error:', err);
+        setShowAddressBarTip(true);
+      }
+    } else {
+      // Prompt not dispatchable (e.g. desktop Chrome already showing Install button in address bar)
+      setShowAddressBarTip(true);
     }
   };
 
@@ -95,7 +115,10 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
           {/* Platform Selector Tabs */}
           <div className="flex items-center gap-2 mt-5 bg-black/20 p-1.5 rounded-xl border border-white/10">
             <button
-              onClick={() => setActivePlatform('android')}
+              onClick={() => {
+                setActivePlatform('android');
+                setShowAddressBarTip(false);
+              }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 activePlatform === 'android'
                   ? 'bg-emerald-500 text-slate-950 shadow-md font-black'
@@ -103,11 +126,14 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               }`}
             >
               <Smartphone className="w-4 h-4" />
-              <span>Android (Play Store / APK)</span>
+              <span>Android (APK)</span>
             </button>
 
             <button
-              onClick={() => setActivePlatform('ios')}
+              onClick={() => {
+                setActivePlatform('ios');
+                setShowAddressBarTip(false);
+              }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 activePlatform === 'ios'
                   ? 'bg-white text-slate-950 shadow-md font-black'
@@ -115,11 +141,14 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               }`}
             >
               <Apple className="w-4 h-4" />
-              <span>Apple iOS (App Store)</span>
+              <span>Apple iOS (iPhone)</span>
             </button>
 
             <button
-              onClick={() => setActivePlatform('pwa')}
+              onClick={() => {
+                setActivePlatform('pwa');
+                setShowAddressBarTip(false);
+              }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 activePlatform === 'pwa'
                   ? 'bg-amber-400 text-slate-950 shadow-md font-black'
@@ -144,14 +173,19 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-white">Android Native Application Package</h3>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      Ready for the Google Play Store and direct installation on any Samsung, Xiaomi, OnePlus, Vivo, Oppo, or Pixel phone.
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-white">Android Direct APK Package</h3>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        v1.0.0
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1">
+                      Directly installable on Samsung, Xiaomi, OnePlus, Vivo, Oppo, Realme, Motorola, and Pixel devices.
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-mono text-emerald-300 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/20">
                       <span>Package: com.kailashbhawan.app</span>
                       <span>•</span>
-                      <span>Target: Android 14+</span>
+                      <span>Target: Android 7.0 - 15+</span>
                     </div>
                   </div>
                 </div>
@@ -160,36 +194,36 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               {/* Install Steps */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  How to Install on Android:
+                  Quick Install Guide:
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-400 font-bold text-xs flex items-center justify-center mb-2">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center mb-2">
                       1
                     </div>
-                    <p className="text-xs font-semibold text-slate-200">Download APK</p>
+                    <p className="text-xs font-semibold text-slate-200">Tap Download</p>
                     <p className="text-[11px] text-slate-400 mt-1">
-                      Download the signed Android APK or bundle from GitHub Releases.
+                      Tap the green button below to download <code className="text-emerald-300">kailash-bhawan.apk</code>.
                     </p>
                   </div>
 
                   <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-400 font-bold text-xs flex items-center justify-center mb-2">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center mb-2">
                       2
                     </div>
                     <p className="text-xs font-semibold text-slate-200">Tap Install</p>
                     <p className="text-[11px] text-slate-400 mt-1">
-                      Open the downloaded file. When prompted, tap "Allow install from source".
+                      Open the downloaded file. Tap "Install" (if asked, allow from this source).
                     </p>
                   </div>
 
                   <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-400 font-bold text-xs flex items-center justify-center mb-2">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center mb-2">
                       3
                     </div>
-                    <p className="text-xs font-semibold text-slate-200">Enjoy Kailash Bhawan</p>
+                    <p className="text-xs font-semibold text-slate-200">Enjoy App</p>
                     <p className="text-[11px] text-slate-400 mt-1">
-                      Full fullscreen app with native camera photo capture and UPI deep linking!
+                      Full fullscreen experience with camera uploads & UPI deep-linking!
                     </p>
                   </div>
                 </div>
@@ -198,24 +232,26 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               {/* Direct Actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <a
-                  href="https://github.com/rohitkumar790/ghar/actions"
+                  href={APK_DOWNLOAD_URL}
+                  download="kailash-bhawan.apk"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm text-center shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all"
+                  className="flex-1 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm text-center shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition-all group"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>Download Android APK / Builds</span>
-                  <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+                  <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                  <span>Download Android APK (Direct)</span>
                 </a>
 
-                <button
-                  type="button"
-                  onClick={handlePwaInstall}
-                  className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm transition-all border border-slate-700 flex items-center justify-center gap-2"
+                <a
+                  href={GITHUB_ACTIONS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-all border border-slate-700 flex items-center justify-center gap-1.5"
+                  title="View GitHub Action Builds"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Direct Web Install</span>
-                </button>
+                  <span>Build Pipeline</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+                </a>
               </div>
             </div>
           )}
@@ -230,9 +266,9 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                     <Apple className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-white">Apple iOS & iPadOS App</h3>
+                    <h3 className="text-sm font-bold text-white">Apple iPhone & iPad App</h3>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Full native Xcode workspace generated in <code className="text-brand-300">client/ios</code>. You can publish to TestFlight or App Store Connect with bundle identifier:
+                      Full native Xcode workspace generated in <code className="text-brand-300">client/ios</code> for TestFlight and Apple App Store upload.
                     </p>
                     <div className="mt-2 text-[11px] font-mono text-slate-200 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-700 inline-block">
                       Bundle ID: com.kailashbhawan.app
@@ -265,7 +301,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                       2
                     </div>
                     <span>
-                      Tap the <strong>Share</strong> button <Share2 className="w-3.5 h-3.5 inline text-sky-400 mx-1" /> at the bottom of the screen.
+                      Tap the <strong>Share</strong> button <Share2 className="w-3.5 h-3.5 inline text-sky-400 mx-1" /> at the bottom of Safari.
                     </span>
                   </div>
 
@@ -283,7 +319,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                       ✓
                     </div>
                     <span className="text-emerald-300 font-medium">
-                      Done! The KAILASH BHAWAN app icon will appear on your iPhone screen and run fullscreen like an App Store app.
+                      Done! KAILASH BHAWAN will launch fullscreen from your iPhone home screen!
                     </span>
                   </div>
                 </div>
@@ -300,13 +336,26 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-white">Progressive Web App (PWA)</h3>
+                    <h3 className="text-sm font-bold text-white">Direct Web App Installation</h3>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Installed directly to your device home screen or desktop application launcher. Loads instantly with offline asset caching and zero waiting.
+                      Installs directly into Chrome, Edge, Safari, or Android with offline caching, high speed, and home screen launch.
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* Address bar helper tooltip */}
+              {showAddressBarTip && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-400/80 text-amber-200 text-xs space-y-2 animate-in zoom-in-95 duration-200">
+                  <div className="flex items-center gap-2 font-bold text-amber-300">
+                    <Info className="w-4 h-4 shrink-0" />
+                    <span>How to Install on Chrome / Edge:</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    Look up at your browser's address bar at the very top of your screen: Click the round <strong>[Install]</strong> or <strong>[⊕]</strong> button right next to <code className="bg-black/30 px-1 py-0.5 rounded text-amber-100">ghar-khaki.vercel.app</code> to install to your computer or phone!
+                  </p>
+                </div>
+              )}
 
               {isInstalled ? (
                 <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-emerald-300 text-xs font-semibold">
@@ -317,7 +366,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
                 <button
                   type="button"
                   onClick={handlePwaInstall}
-                  className="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm text-center shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm text-center shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Install KAILASH BHAWAN to Device</span>
@@ -347,7 +396,7 @@ export const MobileAppDownloadModal: React.FC<MobileAppDownloadModalProps> = ({
               <ShieldCheck className="w-4 h-4" />
               <span>100% Verified Secure & Private</span>
             </div>
-            <span>v2.1.0 • Built with Capacitor</span>
+            <span>v1.0.0 • Built with Capacitor</span>
           </div>
         </div>
       </div>
